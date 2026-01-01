@@ -1,63 +1,224 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>微信公众号排版工具</title>
-    <script src="https://cdn.staticfile.org/vue/3.2.31/vue.global.prod.min.js"></script>
-    <script src="https://cdn.staticfile.org/marked/4.0.2/marked.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公众号排版大师 - 专业版</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/juice/9.1.0/juice.min.js"></script>
+    
     <style>
-        #preview-area h2 { color: #07c160; border-bottom: 2px solid #07c160; padding-bottom: 5px; margin: 20px 0 10px; font-weight: bold; font-size: 1.25rem; }
-        #preview-area p { line-height: 1.8; margin-bottom: 15px; color: #333; text-align: justify; }
-        #preview-area strong { color: #07c160; }
-        .iphone-shell { border: 10px solid #1f2937; border-radius: 3rem; height: 700px; width: 375px; position: relative; background: white; }
+        /* --- 界面基础样式 --- */
+        :root { --primary: #07c160; --bg: #f5f7fa; }
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background: var(--bg); color: #333; height: 100vh; display: flex; flex-direction: column; }
+        
+        /* 顶部导航栏 */
+        .navbar { background: white; padding: 1rem 2rem; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        .logo { font-size: 1.25rem; font-weight: 800; color: #333; display: flex; align-items: center; gap: 8px; }
+        .logo span { color: var(--primary); }
+        
+        /* 按钮组 */
+        .btn-group { display: flex; gap: 10px; }
+        .btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; font-size: 0.95rem; display: flex; align-items: center; gap: 6px; }
+        .btn-outline { background: white; border: 1px solid #ddd; color: #666; }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(7, 193, 96, 0.3); }
+        .btn-primary:hover { background: #06ad56; transform: translateY(-1px); }
+        .btn-primary:active { transform: translateY(0); }
+
+        /* 主布局 */
+        .main-layout { flex: 1; display: flex; padding: 20px; gap: 20px; overflow: hidden; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; }
+        
+        /* 左侧操作区 */
+        .editor-panel { flex: 1; display: flex; flex-direction: column; gap: 15px; background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); min-width: 0; }
+        
+        /* 风格选择器 */
+        .theme-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 10px; }
+        .theme-card { border: 2px solid #eee; padding: 10px; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .theme-card:hover { border-color: #b7ebc9; }
+        .theme-card.active { border-color: var(--primary); background: #f0fdf4; color: var(--primary); font-weight: bold; }
+        
+        /* 输入框 */
+        .input-wrapper { flex: 1; position: relative; border: 1px solid #eee; border-radius: 12px; overflow: hidden; }
+        textarea { width: 100%; height: 100%; border: none; padding: 20px; resize: none; outline: none; font-size: 16px; line-height: 1.6; font-family: monospace; box-sizing: border-box; }
+        
+        /* 右侧预览区 */
+        .preview-panel { width: 400px; display: flex; justify-content: center; align-items: flex-start; flex-shrink: 0; }
+        .iphone { width: 375px; height: 100%; max-height: 750px; background: white; border: 14px solid #2d3436; border-radius: 40px; position: relative; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); overflow: hidden; }
+        .iphone-notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 150px; height: 24px; background: #2d3436; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; z-index: 20; }
+        .wx-header { height: 44px; background: #f7f7f7; border-bottom: 1px solid #ebedf0; margin-top: 24px; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; color: #333; flex-shrink: 0; }
+        .preview-content { flex: 1; overflow-y: auto; padding: 20px; background: #fff; }
+        .preview-content::-webkit-scrollbar { width: 6px; }
+        .preview-content::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+        /* 隐藏的文件上传 */
+        #fileInput { display: none; }
+
+        /* 响应式适配 */
+        @media (max-width: 900px) {
+            .main-layout { flex-direction: column; overflow-y: auto; }
+            .preview-panel { width: 100%; align-items: center; }
+            .iphone { height: 600px; }
+        }
     </style>
 </head>
-<body class="bg-gray-100 p-4 md:p-8">
-    <div id="app" class="max-w-6xl mx-auto">
-        <div class="flex flex-col md:flex-row gap-8">
-            <div class="flex-1">
-                <h1 class="text-2xl font-bold mb-4 text-green-600">文字输入</h1>
-                <textarea v-model="inputText" class="w-full h-[600px] p-4 rounded-xl border-2 border-gray-200 focus:border-green-500 outline-none shadow-inner" placeholder="在这里输入文字..."></textarea>
+<body>
+    <div id="app">
+        <nav class="navbar">
+            <div class="logo">✨ 公众号<span>排版大师</span></div>
+            <div class="btn-group">
+                <button class="btn btn-outline" @click="triggerFileUpload">
+                    📂 导入文稿 (TXT/MD)
+                </button>
+                <input type="file" id="fileInput" accept=".txt,.md" @change="handleFileUpload">
+                
+                <button class="btn btn-primary" @click="copyHtml">
+                    🚀 复制到公众号
+                </button>
             </div>
-            
-            <div class="flex-1 flex flex-col items-center">
-                <div class="flex justify-between w-full max-w-[375px] mb-4">
-                    <h2 class="text-xl font-bold text-gray-700">实时预览</h2>
-                    <button @click="copyToClipboard" class="bg-green-600 text-white px-4 py-1 rounded-lg hover:bg-green-700 active:scale-95 transition">一键复制</button>
+        </nav>
+
+        <div class="main-layout">
+            <div class="editor-panel">
+                <label style="font-weight:bold; color:#666;">选择排版风格：</label>
+                <div class="theme-grid">
+                    <div v-for="(t, key) in themes" :key="key" 
+                         class="theme-card" :class="{ active: currentTheme === key }"
+                         @click="setTheme(key)">
+                        {{ t.name }}
+                    </div>
                 </div>
-                <div class="iphone-shell shadow-2xl overflow-hidden">
-                    <div id="preview-area" class="h-full overflow-y-auto p-6" v-html="outputHtml"></div>
+                
+                <div class="input-wrapper">
+                    <textarea v-model="input" @input="renderHtml" placeholder="在此输入文字，或点击上方“导入文稿”按钮..."></textarea>
+                </div>
+                <div style="font-size: 12px; color: #999; text-align: right;">支持 Markdown 语法</div>
+            </div>
+
+            <div class="preview-panel">
+                <div class="iphone">
+                    <div class="iphone-notch"></div>
+                    <div class="wx-header">公众号预览</div>
+                    <div id="wx-preview" class="preview-content" v-html="output"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const { createApp, ref, computed } = Vue;
+        const { createApp, ref, onMounted } = Vue;
+
         createApp({
             setup() {
-                const inputText = ref('## 欢迎使用\n\n在这里输入文字，右边会立刻变美。\n\n**加粗测试**，这是正文内容。你可以直接点右上角的复制按钮。');
-                
-                // 将文字转为带样式的 HTML
-                const outputHtml = computed(() => {
-                    if (typeof marked === 'undefined') return '库加载中...';
-                    return marked.parse(inputText.value);
-                });
+                const input = ref('## 欢迎使用排版大师\n\n点击上方的 **“导入文稿”** 按钮，可以直接打开电脑里的 TXT 文件。\n\n> 这是一个“卡片式”引用块，比微信原生的好看多了。\n\n试试点击上面的不同风格，看看效果！');
+                const output = ref('');
+                const currentTheme = ref('life');
 
-                const copyToClipboard = async () => {
-                    const el = document.getElementById('preview-area');
-                    try {
-                        const blob = new Blob([el.innerHTML], { type: 'text/html' });
-                        const data = [new ClipboardItem({ 'text/html': blob })];
-                        await navigator.clipboard.write(data);
-                        alert('复制成功！请去公众号后台粘贴。');
-                    } catch (err) {
-                        alert('复制失败，请尝试手动选中右侧文字进行复制。');
+                // --- 核心：高级样式库 (CSS写在JS里，确保复制有效) ---
+                const themes = {
+                    life: { 
+                        name: '🌻 生活卡片', 
+                        css: `
+                            .wx-content { font-size: 16px; color: #333; line-height: 1.8; text-align: justify; }
+                            /* 标题：黄色背景块 */
+                            h2 { display: table; background: #fff7e6; color: #d46b08; padding: 8px 15px; border-radius: 6px; margin: 30px 0 15px 0; font-size: 17px; font-weight: bold; }
+                            /* 引用：卡片风格 */
+                            blockquote { background: white; border-left: 5px solid #ffa940; padding: 15px; margin: 20px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-radius: 4px; color: #666; }
+                            strong { color: #d46b08; background: rgba(255, 169, 64, 0.15); padding: 0 2px; }
+                        `
+                    },
+                    tech: { 
+                        name: '💻 科技商务', 
+                        css: `
+                            .wx-content { font-size: 16px; color: #333; line-height: 1.7; text-align: justify; }
+                            /* 标题：左侧蓝线 */
+                            h2 { border-left: 6px solid #1890ff; padding-left: 12px; background: linear-gradient(to right, #e6f7ff, transparent); margin: 30px 0 15px; font-size: 18px; color: #003a8c; padding-top: 5px; padding-bottom: 5px; }
+                            /* 引用：科技灰 */
+                            blockquote { background: #f0f2f5; border: 1px solid #d9d9d9; padding: 15px; border-radius: 4px; color: #595959; font-size: 15px; }
+                            strong { color: #1890ff; font-weight: bold; }
+                        `
+                    },
+                    bubble: { 
+                        name: '🟢 极简气泡', 
+                        css: `
+                            .wx-content { font-size: 16px; color: #333; line-height: 1.8; }
+                            /* 标题：绿色气泡 */
+                            h2 { display: inline-block; background: #07c160; color: white; padding: 6px 18px; border-radius: 20px; margin: 30px 0 15px; font-size: 16px; box-shadow: 0 4px 6px rgba(7, 193, 96, 0.2); }
+                            blockquote { border: 2px dashed #07c160; background: #f6ffed; padding: 15px; border-radius: 8px; color: #333; }
+                            strong { color: #07c160; border-bottom: 2px solid #07c160; }
+                        `
+                    },
+                    art: { 
+                        name: '🎨 文艺留白', 
+                        css: `
+                            .wx-content { font-size: 16px; color: #555; line-height: 2.0; text-align: center; }
+                            /* 标题：上下线条 */
+                            h2 { color: #722ed1; margin: 40px 0 20px; font-weight: normal; border-top: 1px solid #d3adf7; border-bottom: 1px solid #d3adf7; padding: 10px 0; display: inline-block; min-width: 50%; letter-spacing: 2px; }
+                            blockquote { color: #722ed1; font-family: serif; font-style: italic; margin: 30px 20px; }
+                            strong { color: #722ed1; font-weight: normal; }
+                            p { margin-bottom: 2em; }
+                        `
                     }
                 };
 
-                return { inputText, outputHtml, copyToClipboard };
+                // 核心渲染逻辑
+                const renderHtml = () => {
+                    if (typeof marked === 'undefined' || typeof juice === 'undefined') return;
+                    
+                    const rawHtml = marked.parse(input.value);
+                    const themeCss = themes[currentTheme.value].css;
+                    
+                    // 基础图片适配样式
+                    const baseCss = `img { max-width: 100% !important; height: auto !important; border-radius: 6px; margin: 10px 0; display: block; }`;
+                    
+                    // 使用 Juice 内联样式
+                    const fullHtml = `<div class="wx-content">${rawHtml}</div>`;
+                    output.value = juice.inlineContent(fullHtml, baseCss + themeCss);
+                };
+
+                const setTheme = (key) => {
+                    currentTheme.value = key;
+                    renderHtml();
+                };
+
+                // --- 新功能：导入文件 ---
+                const triggerFileUpload = () => {
+                    document.getElementById('fileInput').click();
+                };
+
+                const handleFileUpload = (event) => {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        input.value = e.target.result; // 将文件内容填入输入框
+                        renderHtml(); // 重新渲染
+                    };
+                    reader.readAsText(file); // 读取为文本
+                    
+                    // 清空 input 允许重复上传同名文件
+                    event.target.value = '';
+                };
+
+                // --- 复制功能 ---
+                const copyHtml = async () => {
+                    const el = document.getElementById('wx-preview');
+                    try {
+                        const blob = new Blob([el.innerHTML], { type: 'text/html' });
+                        await navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })]);
+                        alert('✅ 复制成功！\n\n现在去公众号后台，按 Ctrl+V 粘贴即可看到效果。');
+                    } catch (err) {
+                        alert('复制失败，请手动全选右侧内容复制。');
+                    }
+                };
+
+                onMounted(() => {
+                    setTimeout(renderHtml, 300); // 延迟渲染确保库加载
+                });
+
+                return { input, output, themes, currentTheme, setTheme, renderHtml, copyHtml, triggerFileUpload, handleFileUpload };
             }
         }).mount('#app');
     </script>
