@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>公众号排版大师 - 稳定版</title>
-    <script src="https://lib.baomitu.com/vue/3.3.4/vue.global.prod.min.js"></script>
-    <script src="https://lib.baomitu.com/marked/9.1.2/marked.min.js"></script>
+    <title>公众号排版大师 - 纯净版</title>
+    <script src="https://cdn.staticfile.org/vue/3.3.4/vue.global.prod.min.js"></script>
+    <script src="https://cdn.staticfile.org/marked/9.1.2/marked.min.js"></script>
     
     <style>
         /* --- 布局系统 --- */
@@ -23,12 +23,13 @@
         .logo { font-size: 18px; font-weight: 800; color: #333; display: flex; align-items: center; }
         .logo span { color: #fff; background: #07c160; padding: 2px 6px; border-radius: 4px; font-size: 12px; margin-left: 8px; }
         
-        .header-btns { display: flex; gap: 10px; }
-        .btn-base { border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s; }
-        .btn-donate { background: #fff0f6; color: #eb2f96; }
-        .btn-donate:hover { background: #ffadd2; color: #fff; }
-        .btn-copy { background: #07c160; color: white; box-shadow: 0 4px 10px rgba(7, 193, 96, 0.2); }
+        .btn-copy { 
+            background: #07c160; color: white; border: none; padding: 9px 24px; border-radius: 6px; 
+            font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s; 
+            box-shadow: 0 4px 10px rgba(7, 193, 96, 0.2);
+        }
         .btn-copy:hover { background: #06ad56; transform: translateY(-1px); }
+        .btn-copy:active { transform: translateY(0); }
 
         /* 主区域 */
         .workspace { 
@@ -45,7 +46,7 @@
         /* 风格按钮 */
         .style-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
         .style-tag { 
-            padding: 4px 12px; border: 1px solid #d9d9d9; border-radius: 4px; cursor: pointer; font-size: 13px; white-space: nowrap; background: white; 
+            padding: 5px 14px; border: 1px solid #d9d9d9; border-radius: 4px; cursor: pointer; font-size: 13px; white-space: nowrap; background: white; transition: 0.2s;
         }
         .style-tag:hover { color: #07c160; border-color: #07c160; }
         .style-tag.active { color: #07c160; border-color: #07c160; background: #f6ffed; font-weight: bold; }
@@ -53,10 +54,11 @@
         /* 工具按钮 */
         .format-row { display: flex; gap: 8px; flex-wrap: wrap; }
         .tool-btn { 
-            padding: 6px 12px; border: 1px solid #d9d9d9; border-radius: 4px; background: white; cursor: pointer; font-size: 13px; font-weight: 500; 
+            padding: 6px 12px; border: 1px solid #d9d9d9; border-radius: 4px; background: white; cursor: pointer; font-size: 13px; font-weight: 500; transition: 0.2s;
         }
         .tool-btn:hover { background: #f5f5f5; }
         .tool-btn.danger { color: #ff4d4f; border-color: #ffccc7; margin-left: auto; }
+        .tool-btn.danger:hover { background: #fff1f0; }
 
         /* 编辑器 */
         .editor-box { flex: 1; position: relative; display: flex; flex-direction: column; }
@@ -77,11 +79,6 @@
             flex: 1; overflow-y: auto; padding: 20px; word-wrap: break-word; background: #fff; padding-bottom: 50px; 
         }
         
-        /* 弹窗 */
-        .modal-mask { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: flex; justify-content: center; align-items: center; }
-        .modal { background: white; padding: 24px; border-radius: 12px; width: 300px; text-align: center; }
-        .qr-placeholder { width: 150px; height: 150px; background: #f0f0f0; margin: 16px auto; display: flex; align-items: center; justify-content: center; color: #999; border-radius: 8px; }
-
         /* 滚动条 */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
@@ -97,23 +94,9 @@
 </head>
 <body>
     <div id="app">
-        <div class="modal-mask" v-if="showPay" @click.self="showPay = false">
-            <div class="modal">
-                <h3 style="margin-top:0;">☕️ 支持作者</h3>
-                <p style="font-size:13px; color:#666;">您的支持是我维护的动力</p>
-                <div class="qr-placeholder">
-                    <img src="https://via.placeholder.com/150?text=QRCode" style="width:100%; border-radius:8px;">
-                </div>
-                <button class="btn-base" @click="showPay = false" style="background:#eee; margin-top:10px;">关闭</button>
-            </div>
-        </div>
-
         <header class="header">
-            <div class="logo">公众号排版大师 <span>Pro</span></div>
-            <div class="header-btns">
-                <button class="btn-base btn-donate" @click="showPay = true">☕️ 打赏</button>
-                <button class="btn-base btn-copy" @click="copyHtml">{{ copyText }}</button>
-            </div>
+            <div class="logo">排版大师 <span>纯净版</span></div>
+            <button class="btn-copy" @click="copyHtml">{{ copyText }}</button>
         </header>
 
         <div class="workspace">
@@ -124,7 +107,7 @@
                         <div class="style-tag" :class="{active: theme==='warm'}" @click="setTheme('warm')">🟠 生活暖</div>
                         <div class="style-tag" :class="{active: theme==='clean'}" @click="setTheme('clean')">🟢 简约绿</div>
                         <div class="style-tag" :class="{active: theme==='festive'}" @click="setTheme('festive')">🔴 节日红</div>
-                        <div style="margin-left:auto; display:flex; align-items:center; font-size:12px; gap:5px;">
+                        <div style="margin-left:auto; display:flex; align-items:center; font-size:12px; gap:5px; color:#666;">
                             字号 <input type="range" min="14" max="20" v-model="fontSize" @input="render">
                         </div>
                     </div>
@@ -151,13 +134,102 @@
     </div>
 
     <script>
-        // 2. 增加错误拦截，如果加载失败会弹窗提示
+        // 错误监控：如果脚本加载失败，提示用户
         window.onerror = function() {
-            alert("系统组件加载慢，请尝试刷新页面 (Ctrl+R)");
+            // 只有当页面空白时才提示，避免打扰
+            if(document.body.innerHTML.trim() === '') {
+                alert("组件加载异常，请尝试刷新页面 (Ctrl+R)");
+            }
         };
 
         const { createApp, ref, onMounted } = Vue;
 
         createApp({
             setup() {
-                const input = ref('## 欢迎使用\n\n如果看到这个页面，说明**修复成功**了！\n\n1. 我们更换了更快的国内服务器。\n2. 解决了乱码问题。\n
+                const input = ref('## 欢迎使用纯净版\n\n我们移除了所有多余的模块，只保留最核心的排版功能。\n\n1. **极速加载**：没有弹窗，打开即用。\n2. **智能分段**：粘贴即排版，无需手动调整。\n\n> 这是一个引用框。全选复制右侧内容，直接粘贴到公众号后台即可。\n\n### 小标题示例\n专注于内容创作，排版交给我们。');
+                const output = ref('');
+                const theme = ref('business');
+                const fontSize = ref(16);
+                const copyText = ref('复制到公众号');
+
+                // 样式定义
+                const getCss = (t, s) => {
+                    const base = `font-size:${s}px; line-height:1.75; margin-bottom:20px; text-align:justify; color:#333;`;
+                    const map = {
+                        business: {
+                            h2: `font-size:${s*1.2}px; border-left:6px solid #1890ff; background:#e6f7ff; padding:8px 12px; margin:30px 0 15px; font-weight:bold; display:block;`,
+                            strong: `color:#1890ff; font-weight:bold;`,
+                            quote: `border-left:4px solid #ccc; background:#f5f5f5; padding:15px; color:#666; margin:20px 0;`
+                        },
+                        warm: {
+                            h2: `font-size:${s*1.2}px; color:#d46b08; text-align:center; border:1px solid #ffe7ba; padding:8px 20px; border-radius:20px; margin:30px auto 15px; display:table; font-weight:bold;`,
+                            strong: `color:#d46b08; font-weight:bold;`,
+                            quote: `border:1px dashed #ffd591; background:#fff7e6; padding:15px; color:#d46b08; margin:20px 0; border-radius:8px;`
+                        },
+                        clean: {
+                            h2: `font-size:${s*1.2}px; color:white; background:#52c41a; padding:6px 15px; border-radius:4px; display:inline-block; margin:30px 0 15px; font-weight:bold;`,
+                            strong: `color:#52c41a; border-bottom:2px solid #52c41a; font-weight:bold;`,
+                            quote: `border-left:3px solid #52c41a; background:#f6ffed; padding:10px 15px; color:#333; margin:20px 0;`
+                        },
+                        festive: {
+                            h2: `font-size:${s*1.2}px; color:#cf1322; border-top:2px solid #cf1322; border-bottom:2px solid #cf1322; padding:8px 0; text-align:center; margin:30px 0 15px; font-weight:bold; display:block;`,
+                            strong: `color:#cf1322; text-decoration:underline; font-weight:bold;`,
+                            quote: `border:2px solid #ffccc7; background:#fff1f0; padding:15px; color:#cf1322; margin:20px 0; border-radius:8px;`
+                        }
+                    };
+                    return { base, ...map[t] };
+                };
+
+                const render = () => {
+                    if (typeof marked === 'undefined') return;
+                    // 智能分段
+                    const text = input.value.replace(/\n/g, '\n\n');
+                    let html = marked.parse(text);
+                    const s = getCss(theme.value, fontSize.value);
+
+                    // 样式注入
+                    html = html.replace(/<h2/g, `<h2 style='${s.h2}' `)
+                               .replace(/<h3/g, `<h3 style='${s.h2}; font-size:${fontSize.value}px; border:none; background:none; padding:0; color:${s.strong.split(';')[0].split(':')[1]}' `)
+                               .replace(/<p/g, `<p style='${s.base}' `)
+                               .replace(/<strong/g, `<strong style='${s.strong}' `)
+                               .replace(/<blockquote/g, `<blockquote style='${s.quote}' `)
+                               .replace(/<img/g, `<img style='max-width:100%; border-radius:6px; margin:10px auto; display:block;' `);
+                    
+                    output.value = html;
+                };
+
+                const setTheme = (t) => { theme.value = t; render(); };
+                
+                const insert = (pre, suf) => {
+                    const el = document.getElementById('editor');
+                    const start = el.selectionStart;
+                    const end = el.selectionEnd;
+                    const txt = input.value;
+                    input.value = txt.substring(0, start) + pre + txt.substring(start, end) + suf + txt.substring(end);
+                    render();
+                };
+
+                const clear = () => { if(confirm('确定清空吗？')) { input.value = ''; render(); } };
+
+                const copyHtml = async () => {
+                    try {
+                        const el = document.getElementById('preview');
+                        const blob = new Blob([el.innerHTML], {type: 'text/html'});
+                        await navigator.clipboard.write([new ClipboardItem({'text/html': blob})]);
+                        copyText.value = '✅ 复制成功';
+                        setTimeout(() => copyText.value = '复制到公众号', 2000);
+                    } catch(e) { alert('请手动复制'); }
+                };
+
+                onMounted(() => {
+                    const timer = setInterval(() => {
+                        if (typeof marked !== 'undefined') { render(); clearInterval(timer); }
+                    }, 100);
+                });
+
+                return { input, output, theme, fontSize, setTheme, render, insert, clear, copyHtml, copyText };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
