@@ -1,85 +1,63 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>公众号排版助手</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <title>微信公众号排版工具</title>
+    <script src="https://cdn.staticfile.org/vue/3.2.31/vue.global.prod.min.js"></script>
+    <script src="https://cdn.staticfile.org/marked/4.0.2/marked.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/juice/9.1.0/juice.min.js"></script>
     <style>
-        .preview-scroll::-webkit-scrollbar { width: 4px; }
-        .preview-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .iphone-border { border: 12px solid #1e293b; border-radius: 3rem; }
+        #preview-area h2 { color: #07c160; border-bottom: 2px solid #07c160; padding-bottom: 5px; margin: 20px 0 10px; font-weight: bold; font-size: 1.25rem; }
+        #preview-area p { line-height: 1.8; margin-bottom: 15px; color: #333; text-align: justify; }
+        #preview-area strong { color: #07c160; }
+        .iphone-shell { border: 10px solid #1f2937; border-radius: 3rem; height: 700px; width: 375px; position: relative; background: white; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
-    <div id="app" class="max-w-7xl mx-auto min-h-screen flex flex-col p-4 md:p-6">
-        <header class="flex flex-col md:flex-row justify-between items-center mb-6 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-            <div class="mb-4 md:mb-0">
-                <h1 class="text-2xl font-black text-green-600">📝 公众号一键排版</h1>
+<body class="bg-gray-100 p-4 md:p-8">
+    <div id="app" class="max-w-6xl mx-auto">
+        <div class="flex flex-col md:flex-row gap-8">
+            <div class="flex-1">
+                <h1 class="text-2xl font-bold mb-4 text-green-600">文字输入</h1>
+                <textarea v-model="inputText" class="w-full h-[600px] p-4 rounded-xl border-2 border-gray-200 focus:border-green-500 outline-none shadow-inner" placeholder="在这里输入文字..."></textarea>
             </div>
-            <button @click="copyHtml" class="bg-green-600 hover:bg-green-700 text-white px-10 py-4 rounded-xl font-bold">复制排版结果</button>
-        </header>
-
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
-            <div class="lg:col-span-5 space-y-6">
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                    <label class="block text-slate-500 font-bold mb-3">1. 粘贴文章内容</label>
-                    <textarea v-model="input" @input="renderHtml" placeholder="在此粘贴文字..." 
-                        class="w-full h-80 p-4 border-2 border-slate-100 rounded-xl focus:border-green-500 outline-none text-lg"></textarea>
+            
+            <div class="flex-1 flex flex-col items-center">
+                <div class="flex justify-between w-full max-w-[375px] mb-4">
+                    <h2 class="text-xl font-bold text-gray-700">实时预览</h2>
+                    <button @click="copyToClipboard" class="bg-green-600 text-white px-4 py-1 rounded-lg hover:bg-green-700 active:scale-95 transition">一键复制</button>
                 </div>
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 text-sm text-slate-500 italic">
-                    提示：修改左侧文字，右侧手机框会实时显示排版效果。 [cite: 18]
-                </div>
-            </div>
-
-            <div class="lg:col-span-7 flex justify-center bg-slate-200 rounded-3xl p-6 overflow-hidden">
-                <div class="relative w-full max-w-[375px]">
-                    <div class="iphone-border bg-white h-[700px] shadow-2xl overflow-hidden flex flex-col relative">
-                        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-5 bg-slate-800 rounded-b-xl z-10"></div>
-                        <div id="preview" class="preview-scroll flex-1 overflow-y-auto p-6 pt-10 bg-white" v-html="output"></div>
-                    </div>
+                <div class="iphone-shell shadow-2xl overflow-hidden">
+                    <div id="preview-area" class="h-full overflow-y-auto p-6" v-html="outputHtml"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const { createApp, ref, onMounted } = Vue;
+        const { createApp, ref, computed } = Vue;
         createApp({
             setup() {
-                const input = ref('## 欢迎使用\n在这里粘贴你的内容，右边会实时显示排版效果。\n\n**加粗测试**，这是正文内容。');
-                const output = ref('');
+                const inputText = ref('## 欢迎使用\n\n在这里输入文字，右边会立刻变美。\n\n**加粗测试**，这是正文内容。你可以直接点右上角的复制按钮。');
                 
-                const renderHtml = () => {
-                    try {
-                        const rawHtml = marked.parse(input.value);
-                        const css = `
-                            h2 { color: #07c160; border-bottom: 2px solid #07c160; padding-bottom: 5px; margin-top: 20px; }
-                            p { line-height: 1.8; margin-bottom: 15px; color: #333; }
-                            strong { color: #07c160; }
-                        `;
-                        output.value = juice.inlineContent('<div>' + rawHtml + '</div>', css);
-                    } catch (e) {
-                        console.error('渲染出错:', e);
-                    }
-                };
+                // 将文字转为带样式的 HTML
+                const outputHtml = computed(() => {
+                    if (typeof marked === 'undefined') return '库加载中...';
+                    return marked.parse(inputText.value);
+                });
 
-                const copyHtml = async () => {
+                const copyToClipboard = async () => {
+                    const el = document.getElementById('preview-area');
                     try {
-                        const el = document.getElementById('preview');
                         const blob = new Blob([el.innerHTML], { type: 'text/html' });
                         const data = [new ClipboardItem({ 'text/html': blob })];
                         await navigator.clipboard.write(data);
-                        alert('✅ 复制成功！请前往公众号后台粘贴。');
+                        alert('复制成功！请去公众号后台粘贴。');
                     } catch (err) {
-                        alert('复制失败，请尝试手动选中右侧内容复制。');
+                        alert('复制失败，请尝试手动选中右侧文字进行复制。');
                     }
                 };
 
-                onMounted(renderHtml);
-                return { input, output, renderHtml, copyHtml };
+                return { inputText, outputHtml, copyToClipboard };
             }
         }).mount('#app');
     </script>
