@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>公众号排版助手 - 极简专业版</title>
+    <title>公众号排版助手</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -15,48 +15,22 @@
 </head>
 <body class="bg-slate-50 text-slate-900">
     <div id="app" class="max-w-7xl mx-auto min-h-screen flex flex-col p-4 md:p-6">
-        
         <header class="flex flex-col md:flex-row justify-between items-center mb-6 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
             <div class="mb-4 md:mb-0">
-                <h1 class="text-2xl font-black text-green-600 flex items-center">
-                    <span class="mr-2">📝</span> 公众号一键排版
-                </h1>
-                <p class="text-slate-400 text-sm font-medium">适合生活分享、行业交流与学术科普</p>
+                <h1 class="text-2xl font-black text-green-600">📝 公众号一键排版</h1>
             </div>
-            <button @click="copyHtml" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-10 py-4 rounded-xl font-bold shadow-lg transition-all active:scale-95 text-lg">
-                复制排版结果
-            </button>
+            <button @click="copyHtml" class="bg-green-600 hover:bg-green-700 text-white px-10 py-4 rounded-xl font-bold">复制排版结果</button>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
             <div class="lg:col-span-5 space-y-6">
                 <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
                     <label class="block text-slate-500 font-bold mb-3">1. 粘贴文章内容</label>
-                    <textarea v-model="input" @input="renderHtml" placeholder="在此输入文字..."
-                        class="w-full h-64 p-4 border-2 border-slate-100 rounded-xl focus:border-green-500 outline-none text-lg leading-relaxed"></textarea>
+                    <textarea v-model="input" @input="renderHtml" placeholder="在此粘贴文字..." 
+                        class="w-full h-80 p-4 border-2 border-slate-100 rounded-xl focus:border-green-500 outline-none text-lg"></textarea>
                 </div>
-
-                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
-                    <label class="block text-slate-500 font-bold mb-4">2. 选择预设风格</label>
-                    <div class="grid grid-cols-2 gap-3 mb-6">
-                        <button v-for="(v, k) in themes" @click="setTheme(k)" 
-                            :class="currentTheme === k ? 'border-green-500 bg-green-50 text-green-700' : 'border-slate-100 bg-slate-50'"
-                            class="border-2 py-3 px-2 rounded-xl font-bold transition-all">
-                            {{ v.name }}
-                        </button>
-                    </div>
-
-                    <label class="block text-slate-500 font-bold mb-4">3. 细节灵活微调</label>
-                    <div class="space-y-5">
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm">字体大小 ({{ fontSize }}px)</span>
-                            <input type="range" min="14" max="22" v-model="fontSize" @input="renderHtml" class="w-1/2 accent-green-600">
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-sm">主题颜色</span>
-                            <input type="color" v-model="brandColor" @input="renderHtml" class="h-10 w-1/2 cursor-pointer rounded">
-                        </div>
-                    </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 text-sm text-slate-500 italic">
+                    提示：修改左侧文字，右侧手机框会实时显示排版效果。 [cite: 18]
                 </div>
             </div>
 
@@ -75,52 +49,37 @@
         const { createApp, ref, onMounted } = Vue;
         createApp({
             setup() {
-                const input = ref('## 欢迎使用排版助手\n在这里粘贴你的草稿，右边会立刻显示精美样式。\n\n**加粗**的内容会自动识别主题色。\n\n> 引用块非常适合放名言或者补充说明。');
+                const input = ref('## 欢迎使用\n在这里粘贴你的内容，右边会实时显示排版效果。\n\n**加粗测试**，这是正文内容。');
                 const output = ref('');
-                const currentTheme = ref('life');
-                const fontSize = ref(17);
-                const brandColor = ref('#f29100');
-
-                const themes = {
-                    life: { name: '🌻 生活分享', align: 'left', color: '#f29100' },
-                    industry: { name: '📘 行业动态', align: 'left', color: '#07c160' },
-                    academic: { name: '🏛️ 严肃科普', align: 'justify', color: '#003366' },
-                    art: { name: '🎨 文艺美文', align: 'center', color: '#8e71c1' }
-                };
-
+                
                 const renderHtml = () => {
-                    const t = themes[currentTheme.value];
-                    const rawHtml = marked.parse(input.value);
-                    let css = `
-                        div { font-size: ${fontSize.value}px; color: #333; line-height: 1.8; text-align: ${t.align}; }
-                        h2 { color: ${brandColor.value}; margin: 25px 0 15px; font-weight: bold; }
-                        strong { color: ${brandColor.value}; }
-                        p { margin-bottom: 1.2em; }
-                    `;
-
-                    if(currentTheme.value === 'life') css += `h2 { border-bottom: 2px solid ${brandColor.value}; padding-bottom: 3px; } blockquote { background: #fdf6ec; border-left: 5px solid ${brandColor.value}; padding: 15px; }`;
-                    if(currentTheme.value === 'industry') css += `h2 { border-left: 6px solid ${brandColor.value}; padding-left: 10px; background: #f0fdf4; padding: 5px 10px; }`;
-                    if(currentTheme.value === 'academic') css += `h2 { text-align: center; font-size: 1.3em; } blockquote { border: 1px solid #eee; padding: 15px; font-style: italic; color: #666; }`;
-                    if(currentTheme.value === 'art') css += `h2 { letter-spacing: 0.2em; font-weight: normal; } p { letter-spacing: 0.05em; }`;
-
-                    output.value = juice.inlineContent(`<div>${rawHtml}</div>`, css);
-                };
-
-                const setTheme = (key) => {
-                    currentTheme.value = key;
-                    brandColor.value = themes[key].color;
-                    renderHtml();
+                    try {
+                        const rawHtml = marked.parse(input.value);
+                        const css = `
+                            h2 { color: #07c160; border-bottom: 2px solid #07c160; padding-bottom: 5px; margin-top: 20px; }
+                            p { line-height: 1.8; margin-bottom: 15px; color: #333; }
+                            strong { color: #07c160; }
+                        `;
+                        output.value = juice.inlineContent('<div>' + rawHtml + '</div>', css);
+                    } catch (e) {
+                        console.error('渲染出错:', e);
+                    }
                 };
 
                 const copyHtml = async () => {
-                    const el = document.getElementById('preview');
-                    const blob = new Blob([el.innerHTML], { type: 'text/html' });
-                    await navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })]);
-                    alert('✅ 复制成功！\n请打开公众号后台粘贴即可。');
+                    try {
+                        const el = document.getElementById('preview');
+                        const blob = new Blob([el.innerHTML], { type: 'text/html' });
+                        const data = [new ClipboardItem({ 'text/html': blob })];
+                        await navigator.clipboard.write(data);
+                        alert('✅ 复制成功！请前往公众号后台粘贴。');
+                    } catch (err) {
+                        alert('复制失败，请尝试手动选中右侧内容复制。');
+                    }
                 };
 
-                onMounted(() => setTheme('life'));
-                return { input, output, currentTheme, fontSize, brandColor, themes, setTheme, renderHtml, copyHtml };
+                onMounted(renderHtml);
+                return { input, output, renderHtml, copyHtml };
             }
         }).mount('#app');
     </script>
