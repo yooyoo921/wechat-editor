@@ -108,4 +108,87 @@
                     },
                     tech: {
                         h2: 'font-size: 18px; font-weight: bold; color: #1890ff; border-left: 5px solid #1890ff; padding-left: 12px; margin: 30px 0 15px; background: linear-gradient(to right, #e6f7ff, transparent); padding-top:5px; padding-bottom:5px;',
-                        p: 'font-size: 16px; color: #222; line-height: 1.75
+                        p: 'font-size: 16px; color: #222; line-height: 1.75; margin-bottom: 20px; text-align: justify;',
+                        strong: 'color: #1890ff; font-weight: bold;',
+                        blockquote: 'font-size: 15px; color: #555; background: #f0f5ff; border: 1px solid #adc6ff; padding: 15px; margin: 20px 0; border-radius: 6px;'
+                    },
+                    simple: {
+                        h2: 'font-size: 16px; font-weight: bold; color: #fff; background: #07c160; padding: 6px 15px; border-radius: 20px; margin: 25px 0 15px; display: inline-block; box-shadow: 0 4px 6px rgba(7,193,96,0.2);',
+                        p: 'font-size: 16px; color: #333; line-height: 1.8; margin-bottom: 20px;',
+                        strong: 'color: #07c160; border-bottom: 2px solid #07c160;',
+                        blockquote: 'font-size: 15px; color: #555; padding: 15px; border: 2px dashed #07c160; border-radius: 8px; margin: 20px 0;'
+                    },
+                    art: {
+                        h2: 'font-size: 18px; font-weight: normal; color: #722ed1; text-align: center; border-top: 1px solid #d3adf7; border-bottom: 1px solid #d3adf7; padding: 10px 0; margin: 35px 0 20px; letter-spacing: 2px;',
+                        p: 'font-size: 16px; color: #555; line-height: 2.0; margin-bottom: 25px; text-align: center;',
+                        strong: 'color: #722ed1;',
+                        blockquote: 'font-size: 15px; color: #722ed1; font-family: STKaiti, KaiTi, serif; margin: 30px 20px; font-style: italic;'
+                    }
+                };
+
+                // --- 2. 核心渲染器 (不依赖 Juice，手写替换) ---
+                // 这个函数把 Markdown 生成的普通 HTML 标签，替换成带 style 的标签
+                const render = () => {
+                    // 检查库是否加载
+                    if (typeof marked === 'undefined') {
+                        output.value = '<p style="color:red; text-align:center; margin-top:50px;">正在加载资源，请稍等...</p>';
+                        return;
+                    }
+
+                    // 1. 转 HTML
+                    let html = marked.parse(input.value);
+
+                    // 2. 获取当前主题样式
+                    const s = styles[currentTheme.value];
+
+                    // 3. 暴力替换 (最稳的方法) -> 给标签加 style
+                    // 替换 H2
+                    html = html.replace(/<h2>/g, `<h2 style="${s.h2}">`);
+                    // 替换 P (注意不替换已经在 blockquote 里的 p)
+                    html = html.replace(/<p>/g, `<p style="${s.p}">`);
+                    // 替换 Strong
+                    html = html.replace(/<strong>/g, `<strong style="${s.strong}">`);
+                    // 替换 Blockquote
+                    html = html.replace(/<blockquote>/g, `<blockquote style="${s.blockquote}">`);
+                    // 修复图片
+                    html = html.replace(/<img/g, '<img style="max-width:100%; height:auto; border-radius:6px; display:block; margin:10px auto;"');
+
+                    output.value = html;
+                };
+
+                const setTheme = (key) => {
+                    currentTheme.value = key;
+                    render();
+                };
+
+                const copyResult = async () => {
+                    const el = document.getElementById('wx-preview');
+                    try {
+                        // 复制 HTML
+                        const blob = new Blob([el.innerHTML], { type: 'text/html' });
+                        await navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })]);
+                        
+                        copyText.value = '✅ 复制成功!';
+                        setTimeout(() => copyText.value = '复制到公众号', 2000);
+                    } catch (e) {
+                        alert('复制失败，请手动选中右侧内容复制');
+                    }
+                };
+
+                // 启动
+                onMounted(() => {
+                    // 简单轮询检查 marked 是否加载完成 (解决网速慢的问题)
+                    const checkInterval = setInterval(() => {
+                        if (typeof marked !== 'undefined') {
+                            render();
+                            clearInterval(checkInterval);
+                        }
+                    }, 200);
+                });
+
+                return { input, output, currentTheme, setTheme, render, copyResult, copyText };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
