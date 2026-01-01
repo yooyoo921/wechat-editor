@@ -3,22 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>公众号排版大师 - 纯净版</title>
+    <title>公众号排版大师 - 完美适配版</title>
     <script src="https://cdn.staticfile.org/vue/3.3.4/vue.global.prod.min.js"></script>
     <script src="https://cdn.staticfile.org/marked/9.1.2/marked.min.js"></script>
     
     <style>
-        /* --- 布局系统 --- */
+        /* --- 1. 全局布局锁定 (防止整个网页滚动) --- */
         * { box-sizing: border-box; }
         body { 
             margin: 0; background: #f5f7fa; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; 
-            height: 100vh; display: flex; flex-direction: column; color: #333; overflow: hidden; 
+            height: 100vh; /* 强制占满一屏 */
+            width: 100vw;
+            display: flex; flex-direction: column; color: #333; 
+            overflow: hidden; /* 禁止外层滚动 */
         }
         
-        /* 顶部导航 */
+        /* 顶部导航 (固定高度 60px) */
         .header { 
-            background: white; padding: 0 24px; height: 60px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
-            display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; z-index: 100; 
+            flex: 0 0 60px; /* 锁定高度，不许伸缩 */
+            background: white; padding: 0 24px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+            display: flex; justify-content: space-between; align-items: center; z-index: 100; 
         }
         .logo { font-size: 18px; font-weight: 800; color: #333; display: flex; align-items: center; }
         .logo span { color: #fff; background: #07c160; padding: 2px 6px; border-radius: 4px; font-size: 12px; margin-left: 8px; }
@@ -29,16 +34,24 @@
             box-shadow: 0 4px 10px rgba(7, 193, 96, 0.2);
         }
         .btn-copy:hover { background: #06ad56; transform: translateY(-1px); }
-        .btn-copy:active { transform: translateY(0); }
 
-        /* 主区域 */
+        /* --- 2. 主工作区 (核心修复) --- */
         .workspace { 
-            flex: 1; display: flex; gap: 20px; padding: 20px; width: 100%; max-width: 1400px; margin: 0 auto; min-height: 0; 
+            flex: 1; /* 占据剩余所有空间 */
+            display: flex; 
+            gap: 20px; 
+            padding: 20px; 
+            width: 100%; 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            min-height: 0; /* 关键：允许子元素压缩，防止溢出 */
+            overflow: hidden; /* 防止内容撑开 */
         }
         
         /* 左侧面板 */
         .panel-left { 
-            flex: 1; background: white; border-radius: 12px; display: flex; flex-direction: column; 
+            flex: 1; 
+            background: white; border-radius: 12px; display: flex; flex-direction: column; 
             border: 1px solid #e8e8e8; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02); 
         }
         .toolbar { padding: 12px 16px; background: #fafafa; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 12px; }
@@ -58,31 +71,58 @@
         }
         .tool-btn:hover { background: #f5f5f5; }
         .tool-btn.danger { color: #ff4d4f; border-color: #ffccc7; margin-left: auto; }
-        .tool-btn.danger:hover { background: #fff1f0; }
 
-        /* 编辑器 */
-        .editor-box { flex: 1; position: relative; display: flex; flex-direction: column; }
+        /* 编辑器 (独立滚动) */
+        .editor-box { flex: 1; position: relative; display: flex; flex-direction: column; min-height: 0; }
         .notice-bar { background: #fffbe6; color: #d46b08; padding: 8px 16px; font-size: 12px; border-bottom: 1px solid #ffe58f; }
         textarea { 
             flex: 1; width: 100%; border: none; padding: 20px; resize: none; outline: none; 
             font-size: 16px; line-height: 1.7; color: #333; font-family: monospace;
+            overflow-y: auto; /* 允许内部滚动 */
         }
 
-        /* 右侧预览 */
-        .panel-right { width: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; flex-shrink: 0; }
-        .phone { 
-            width: 375px; height: 100%; background: white; border: 12px solid #333; border-radius: 40px; 
-            overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2); 
-        }
-        .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 150px; height: 24px; background: #333; border-radius: 0 0 16px 16px; z-index: 10; }
-        .preview-content { 
-            flex: 1; overflow-y: auto; padding: 20px; word-wrap: break-word; background: #fff; padding-bottom: 50px; 
+        /* --- 3. 右侧预览面板 (高度自适应修复) --- */
+        .panel-right { 
+            width: 400px; 
+            height: 100%; /* 占满父容器高度 */
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; /* 垂直居中 */
+            flex-shrink: 0; 
+            overflow: hidden; /* 防止溢出 */
         }
         
-        /* 滚动条 */
+        .phone { 
+            width: 375px; 
+            height: 100%; /* 占满 panel-right */
+            max-height: 100%; /* 严禁超出 */
+            background: white; 
+            border: 12px solid #333; 
+            border-radius: 40px; 
+            overflow: hidden; 
+            display: flex; flex-direction: column; position: relative; 
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2); 
+            margin-bottom: 5px; /* 底部微调留白 */
+        }
+        
+        .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 150px; height: 24px; background: #333; border-radius: 0 0 16px 16px; z-index: 10; }
+        
+        .preview-content { 
+            flex: 1; 
+            overflow-y: auto; /* 允许手机内部滚动 */
+            padding: 20px; 
+            word-wrap: break-word; 
+            background: #fff; 
+            padding-bottom: 50px; /* 防止内容贴底 */
+            padding-top: 30px; /* 避开刘海 */
+        }
+        
+        /* 滚动条美化 */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
 
+        /* 移动端适配 */
         @media (max-width: 900px) {
             body { height: auto; overflow-y: auto; }
             .workspace { flex-direction: column; padding: 10px; height: auto; }
@@ -134,9 +174,8 @@
     </div>
 
     <script>
-        // 错误监控：如果脚本加载失败，提示用户
+        // 错误监控
         window.onerror = function() {
-            // 只有当页面空白时才提示，避免打扰
             if(document.body.innerHTML.trim() === '') {
                 alert("组件加载异常，请尝试刷新页面 (Ctrl+R)");
             }
@@ -146,7 +185,7 @@
 
         createApp({
             setup() {
-                const input = ref('## 欢迎使用纯净版\n\n我们移除了所有多余的模块，只保留最核心的排版功能。\n\n1. **极速加载**：没有弹窗，打开即用。\n2. **智能分段**：粘贴即排版，无需手动调整。\n\n> 这是一个引用框。全选复制右侧内容，直接粘贴到公众号后台即可。\n\n### 小标题示例\n专注于内容创作，排版交给我们。');
+                const input = ref('## 终于修复了底部！\n\n1. 现在无论您的屏幕多小，**底部都不会被切掉了**。\n2. 我们让手机框高度自动跟随您的屏幕大小变化。\n\n> 这是一个完美的自适应版本。\n\n### 小标题示例\n现在页面看起来非常清爽，完全没有多余的干扰。');
                 const output = ref('');
                 const theme = ref('business');
                 const fontSize = ref(16);
@@ -182,12 +221,10 @@
 
                 const render = () => {
                     if (typeof marked === 'undefined') return;
-                    // 智能分段
                     const text = input.value.replace(/\n/g, '\n\n');
                     let html = marked.parse(text);
                     const s = getCss(theme.value, fontSize.value);
 
-                    // 样式注入
                     html = html.replace(/<h2/g, `<h2 style='${s.h2}' `)
                                .replace(/<h3/g, `<h3 style='${s.h2}; font-size:${fontSize.value}px; border:none; background:none; padding:0; color:${s.strong.split(';')[0].split(':')[1]}' `)
                                .replace(/<p/g, `<p style='${s.base}' `)
