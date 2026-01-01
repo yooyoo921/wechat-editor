@@ -39,9 +39,12 @@
         .theme-card:hover { border-color: #b7ebc9; }
         .theme-card.active { border-color: var(--primary); background: #f0fdf4; color: var(--primary); font-weight: bold; }
         
-        /* 输入框 */
-        .input-wrapper { flex: 1; position: relative; border: 1px solid #eee; border-radius: 12px; overflow: hidden; }
-        textarea { width: 100%; height: 100%; border: none; padding: 20px; resize: none; outline: none; font-size: 16px; line-height: 1.6; font-family: monospace; box-sizing: border-box; }
+        /* 输入框与提示 */
+        .input-wrapper { flex: 1; position: relative; border: 1px solid #eee; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+        .toolbar-tip { background: #f8f9fa; padding: 8px 15px; font-size: 12px; color: #666; border-bottom: 1px solid #eee; display: flex; gap: 15px; }
+        .tip-item { display: flex; align-items: center; gap: 5px; }
+        .code-tag { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-weight: bold; color: #475569; }
+        textarea { width: 100%; flex: 1; border: none; padding: 20px; resize: none; outline: none; font-size: 16px; line-height: 1.6; font-family: monospace; box-sizing: border-box; }
         
         /* 右侧预览区 */
         .preview-panel { width: 400px; display: flex; justify-content: center; align-items: flex-start; flex-shrink: 0; }
@@ -69,7 +72,7 @@
             <div class="logo">✨ 公众号<span>排版大师</span></div>
             <div class="btn-group">
                 <button class="btn btn-outline" @click="triggerFileUpload">
-                    📂 导入文稿 (TXT/MD)
+                    📂 导入文稿 (TXT)
                 </button>
                 <input type="file" id="fileInput" accept=".txt,.md" @change="handleFileUpload">
                 
@@ -81,7 +84,7 @@
 
         <div class="main-layout">
             <div class="editor-panel">
-                <label style="font-weight:bold; color:#666;">选择排版风格：</label>
+                <label style="font-weight:bold; color:#666;">第一步：选择排版风格</label>
                 <div class="theme-grid">
                     <div v-for="(t, key) in themes" :key="key" 
                          class="theme-card" :class="{ active: currentTheme === key }"
@@ -90,10 +93,16 @@
                     </div>
                 </div>
                 
+                <label style="font-weight:bold; color:#666; margin-top: 10px;">第二步：输入或导入文章</label>
                 <div class="input-wrapper">
-                    <textarea v-model="input" @input="renderHtml" placeholder="在此输入文字，或点击上方“导入文稿”按钮..."></textarea>
+                    <div class="toolbar-tip">
+                        <div class="tip-item">新手指南：</div>
+                        <div class="tip-item"><span class="code-tag">## 标题</span> = 大标题</div>
+                        <div class="tip-item"><span class="code-tag">**文字**</span> = 加粗变色</div>
+                        <div class="tip-item"><span class="code-tag">> 文字</span> = 引用框</div>
+                    </div>
+                    <textarea v-model="input" @input="renderHtml" placeholder="在此输入文字..."></textarea>
                 </div>
-                <div style="font-size: 12px; color: #999; text-align: right;">支持 Markdown 语法</div>
             </div>
 
             <div class="preview-panel">
@@ -111,19 +120,18 @@
 
         createApp({
             setup() {
-                const input = ref('## 欢迎使用排版大师\n\n点击上方的 **“导入文稿”** 按钮，可以直接打开电脑里的 TXT 文件。\n\n> 这是一个“卡片式”引用块，比微信原生的好看多了。\n\n试试点击上面的不同风格，看看效果！');
+                // 默认的教学文本
+                const input = ref('## 这里的标题会自动变色\n\n点击上方的 **“导入文稿”** 按钮，可以直接打开电脑里的 TXT 文件。\n\n> 这是一个“卡片式”引用块，比微信原生的好看多了。\n\n试着修改这里的文字，右边会实时变化！\n\n输入两个井号 ## 就是标题，输入两个星号 ** 就是加粗。');
                 const output = ref('');
                 const currentTheme = ref('life');
 
-                // --- 核心：高级样式库 (CSS写在JS里，确保复制有效) ---
+                // --- 核心：高级样式库 ---
                 const themes = {
                     life: { 
                         name: '🌻 生活卡片', 
                         css: `
                             .wx-content { font-size: 16px; color: #333; line-height: 1.8; text-align: justify; }
-                            /* 标题：黄色背景块 */
                             h2 { display: table; background: #fff7e6; color: #d46b08; padding: 8px 15px; border-radius: 6px; margin: 30px 0 15px 0; font-size: 17px; font-weight: bold; }
-                            /* 引用：卡片风格 */
                             blockquote { background: white; border-left: 5px solid #ffa940; padding: 15px; margin: 20px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-radius: 4px; color: #666; }
                             strong { color: #d46b08; background: rgba(255, 169, 64, 0.15); padding: 0 2px; }
                         `
@@ -132,9 +140,7 @@
                         name: '💻 科技商务', 
                         css: `
                             .wx-content { font-size: 16px; color: #333; line-height: 1.7; text-align: justify; }
-                            /* 标题：左侧蓝线 */
                             h2 { border-left: 6px solid #1890ff; padding-left: 12px; background: linear-gradient(to right, #e6f7ff, transparent); margin: 30px 0 15px; font-size: 18px; color: #003a8c; padding-top: 5px; padding-bottom: 5px; }
-                            /* 引用：科技灰 */
                             blockquote { background: #f0f2f5; border: 1px solid #d9d9d9; padding: 15px; border-radius: 4px; color: #595959; font-size: 15px; }
                             strong { color: #1890ff; font-weight: bold; }
                         `
@@ -143,7 +149,6 @@
                         name: '🟢 极简气泡', 
                         css: `
                             .wx-content { font-size: 16px; color: #333; line-height: 1.8; }
-                            /* 标题：绿色气泡 */
                             h2 { display: inline-block; background: #07c160; color: white; padding: 6px 18px; border-radius: 20px; margin: 30px 0 15px; font-size: 16px; box-shadow: 0 4px 6px rgba(7, 193, 96, 0.2); }
                             blockquote { border: 2px dashed #07c160; background: #f6ffed; padding: 15px; border-radius: 8px; color: #333; }
                             strong { color: #07c160; border-bottom: 2px solid #07c160; }
@@ -153,7 +158,6 @@
                         name: '🎨 文艺留白', 
                         css: `
                             .wx-content { font-size: 16px; color: #555; line-height: 2.0; text-align: center; }
-                            /* 标题：上下线条 */
                             h2 { color: #722ed1; margin: 40px 0 20px; font-weight: normal; border-top: 1px solid #d3adf7; border-bottom: 1px solid #d3adf7; padding: 10px 0; display: inline-block; min-width: 50%; letter-spacing: 2px; }
                             blockquote { color: #722ed1; font-family: serif; font-style: italic; margin: 30px 20px; }
                             strong { color: #722ed1; font-weight: normal; }
@@ -162,17 +166,12 @@
                     }
                 };
 
-                // 核心渲染逻辑
+                // 渲染逻辑
                 const renderHtml = () => {
                     if (typeof marked === 'undefined' || typeof juice === 'undefined') return;
-                    
                     const rawHtml = marked.parse(input.value);
                     const themeCss = themes[currentTheme.value].css;
-                    
-                    // 基础图片适配样式
                     const baseCss = `img { max-width: 100% !important; height: auto !important; border-radius: 6px; margin: 10px 0; display: block; }`;
-                    
-                    // 使用 Juice 内联样式
                     const fullHtml = `<div class="wx-content">${rawHtml}</div>`;
                     output.value = juice.inlineContent(fullHtml, baseCss + themeCss);
                 };
@@ -182,7 +181,7 @@
                     renderHtml();
                 };
 
-                // --- 新功能：导入文件 ---
+                // 导入文件
                 const triggerFileUpload = () => {
                     document.getElementById('fileInput').click();
                 };
@@ -190,32 +189,29 @@
                 const handleFileUpload = (event) => {
                     const file = event.target.files[0];
                     if (!file) return;
-
                     const reader = new FileReader();
                     reader.onload = (e) => {
-                        input.value = e.target.result; // 将文件内容填入输入框
-                        renderHtml(); // 重新渲染
+                        input.value = e.target.result;
+                        renderHtml();
                     };
-                    reader.readAsText(file); // 读取为文本
-                    
-                    // 清空 input 允许重复上传同名文件
+                    reader.readAsText(file);
                     event.target.value = '';
                 };
 
-                // --- 复制功能 ---
+                // 复制
                 const copyHtml = async () => {
                     const el = document.getElementById('wx-preview');
                     try {
                         const blob = new Blob([el.innerHTML], { type: 'text/html' });
                         await navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })]);
-                        alert('✅ 复制成功！\n\n现在去公众号后台，按 Ctrl+V 粘贴即可看到效果。');
+                        alert('✅ 复制成功！\n\n现在去公众号后台，按 Ctrl+V 粘贴即可。');
                     } catch (err) {
                         alert('复制失败，请手动全选右侧内容复制。');
                     }
                 };
 
                 onMounted(() => {
-                    setTimeout(renderHtml, 300); // 延迟渲染确保库加载
+                    setTimeout(renderHtml, 300);
                 });
 
                 return { input, output, themes, currentTheme, setTheme, renderHtml, copyHtml, triggerFileUpload, handleFileUpload };
