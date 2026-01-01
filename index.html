@@ -3,78 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>公众号排版大师 - 国内极速版</title>
-    
+    <title>公众号排版大师 - 终极优化版</title>
     <script src="https://cdn.staticfile.org/vue/3.3.4/vue.global.prod.min.js"></script>
     <script src="https://cdn.staticfile.org/marked/9.1.2/marked.min.js"></script>
     
     <style>
-        /* --- 基础布局样式 --- */
-        body { margin: 0; background: #f0f2f5; font-family: -apple-system, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        /* --- 全局样式 --- */
+        body { margin: 0; background: #f0f2f5; font-family: "PingFang SC", "Microsoft YaHei", sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: #333; }
         
-        /* 顶部 */
-        .header { background: white; padding: 15px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; z-index: 10; flex-shrink: 0; }
-        .logo { font-size: 20px; font-weight: bold; color: #333; display: flex; align-items: center; gap: 8px; }
-        .logo span { color: #07c160; }
-        .btn-copy { background: #07c160; color: white; border: none; padding: 10px 25px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 15px; }
-        .btn-copy:hover { background: #06ad56; transform: scale(1.02); }
-        .btn-copy:active { transform: scale(0.98); }
+        /* 顶部导航 */
+        .header { background: white; padding: 12px 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; z-index: 20; }
+        .logo { font-size: 20px; font-weight: 800; color: #333; display: flex; align-items: center; gap: 8px; }
+        .logo span { color: #07c160; background: #e6f7ef; padding: 2px 8px; border-radius: 4px; font-size: 14px; }
+        
+        .btn-copy { 
+            background: #07c160; color: white; border: none; padding: 8px 25px; border-radius: 6px; 
+            font-weight: bold; cursor: pointer; font-size: 15px; box-shadow: 0 4px 10px rgba(7, 193, 96, 0.2); transition: 0.2s; 
+        }
+        .btn-copy:hover { background: #06ad56; transform: translateY(-1px); }
+        .btn-copy:active { transform: translateY(0); }
 
-        /* 主工作台 */
-        .workspace { flex: 1; display: flex; gap: 20px; padding: 20px; max-width: 1400px; margin: 0 auto; width: 100%; box-sizing: border-box; overflow: hidden; }
+        /* 主工作区 */
+        .workspace { flex: 1; display: flex; gap: 20px; padding: 20px; max-width: 1600px; margin: 0 auto; width: 100%; box-sizing: border-box; overflow: hidden; }
         
-        /* 左侧：编辑区 */
-        .panel-left { flex: 1; background: white; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.03); min-width: 0; }
+        /* 左侧：编辑面板 */
+        .panel-left { flex: 1; background: white; border-radius: 12px; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.03); min-width: 0; overflow: hidden; border: 1px solid #eef0f2; }
         
-        /* 风格切换卡片 */
-        .style-tabs { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-        .tab-item { padding: 8px 16px; border: 1px solid #ddd; border-radius: 6px; cursor: pointer; font-size: 14px; color: #666; transition: 0.2s; user-select: none; }
-        .tab-item:hover { color: #07c160; border-color: #07c160; }
-        .tab-item.active { background: #e8faf0; border-color: #07c160; color: #07c160; font-weight: bold; }
-        
-        /* 输入框容器 */
-        .editor-wrapper { flex: 1; position: relative; border: 1px solid #eee; border-radius: 8px; background: #fafafa; }
-        textarea { width: 100%; height: 100%; border: none; background: transparent; padding: 20px; resize: none; outline: none; font-size: 16px; line-height: 1.6; font-family: monospace; box-sizing: border-box; }
+        /* 1. 全局设置栏 (字号/间距) */
+        .settings-bar { padding: 12px 20px; background: #fafafa; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 20px; font-size: 14px; color: #555; }
+        .slider-group { display: flex; align-items: center; gap: 8px; }
+        input[type=range] { width: 100px; cursor: pointer; accent-color: #07c160; }
 
-        /* 右侧：预览区 */
-        .panel-right { width: 400px; display: flex; justify-content: center; align-items: flex-start; flex-shrink: 0; }
-        .phone-frame { width: 375px; height: 100%; max-height: 750px; background: white; border: 12px solid #2d3436; border-radius: 40px; position: relative; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.2); overflow: hidden; }
-        .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 140px; height: 25px; background: #2d3436; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; z-index: 20; }
-        .preview-scroll { flex: 1; overflow-y: auto; padding: 25px 20px; background: #fff; margin-top: 25px; }
-        
-        /* 滚动条隐藏但可滚动 */
+        /* 2. 风格选择栏 */
+        .style-bar { padding: 12px 20px; border-bottom: 1px solid #eee; display: flex; gap: 10px; background: #fff; flex-wrap: wrap; }
+        .style-btn { 
+            padding: 6px 14px; border: 1px solid #eee; border-radius: 6px; cursor: pointer; 
+            font-size: 13px; color: #666; transition: 0.2s; background: white; display: flex; align-items: center; gap: 5px;
+        }
+        .style-btn:hover { border-color: #07c160; color: #07c160; }
+        .style-btn.active { background: #e6f7ef; border-color: #07c160; color: #07c160; font-weight: bold; }
+        .color-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        /* 3. 工具栏 (按钮+表情) */
+        .toolbar { padding: 10px 20px; background: #fff; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 10px; }
+        .tool-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .tool-btn { 
+            background: #f4f6f8; border: none; padding: 6px 12px; border-radius: 4px; 
+            cursor: pointer; font-size: 13px; font-weight: 600; color: #444; transition: 0.2s;
+        }
+        .tool-btn:hover { background: #e0e4e8; }
+        .emoji-btn { font-size: 18px; cursor: pointer; padding: 2px 5px; transition: 0.2s; border-radius: 4px; }
+        .emoji-btn:hover { background: #eee; transform: scale(1.2); }
+
+        /* 编辑框 */
+        .editor-area { flex: 1; position: relative; }
+        textarea { 
+            width: 100%; height: 100%; border: none; padding: 25px; resize: none; outline: none; 
+            font-size: 16px; line-height: 1.7; color: #333; font-family: monospace;
+        }
+
+        /* 右侧：手机预览 */
+        .panel-right { width: 400px; display: flex; justify-content: center; align-items: center; flex-shrink: 0; background: #f0f2f5; }
+        .phone-frame { 
+            width: 375px; height: 95%; max-height: 800px; background: white; 
+            border: 12px solid #2d3436; border-radius: 40px; position: relative; 
+            display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.15); overflow: hidden; 
+        }
+        .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 140px; height: 24px; background: #2d3436; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; z-index: 20; }
+        .preview-scroll { flex: 1; overflow-y: auto; padding: 30px 20px; background: #fff; transition: all 0.3s; }
         .preview-scroll::-webkit-scrollbar { width: 5px; }
-        .preview-scroll::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+        .preview-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
 
         /* 移动端适配 */
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
             .workspace { flex-direction: column; overflow-y: auto; }
-            .panel-right { width: 100%; align-items: center; }
-            .phone-frame { height: 600px; }
+            .panel-right { width: 100%; height: 600px; padding-bottom: 30px; }
         }
     </style>
 </head>
 <body>
     <div id="app">
         <div class="header">
-            <div class="logo">⚡️ 排版大师 <span>极速版</span></div>
+            <div class="logo">公众号排版大师 <span>终极优化版</span></div>
             <button class="btn-copy" @click="copyResult">{{ copyText }}</button>
         </div>
 
         <div class="workspace">
             <div class="panel-left">
-                <div class="style-tabs">
-                    <div class="tab-item" :class="{ active: currentTheme === 'life' }" @click="setTheme('life')">🌻 生活温暖</div>
-                    <div class="tab-item" :class="{ active: currentTheme === 'tech' }" @click="setTheme('tech')">💻 科技商务</div>
-                    <div class="tab-item" :class="{ active: currentTheme === 'simple' }" @click="setTheme('simple')">🟢 极简气泡</div>
-                    <div class="tab-item" :class="{ active: currentTheme === 'art' }" @click="setTheme('art')">🎨 文艺留白</div>
+                
+                <div class="settings-bar">
+                    <div class="slider-group">
+                        <span>字体大小: {{ baseFontSize }}px</span>
+                        <input type="range" min="14" max="20" step="0.5" v-model="baseFontSize" @input="render">
+                    </div>
+                    <div class="slider-group">
+                        <span>行间距: {{ lineHeight }}</span>
+                        <input type="range" min="1.4" max="2.2" step="0.1" v-model="lineHeight" @input="render">
+                    </div>
+                </div>
+
+                <div class="style-bar">
+                    <div class="style-btn" :class="{ active: currentTheme === 'business' }" @click="setTheme('business')">
+                        <div class="color-dot" style="background:#1890ff"></div> 商务蓝
+                    </div>
+                    <div class="style-btn" :class="{ active: currentTheme === 'warm' }" @click="setTheme('warm')">
+                        <div class="color-dot" style="background:#f59e0b"></div> 生活暖
+                    </div>
+                    <div class="style-btn" :class="{ active: currentTheme === 'clean' }" @click="setTheme('clean')">
+                        <div class="color-dot" style="background:#059669"></div> 简约绿
+                    </div>
+                    <div class="style-btn" :class="{ active: currentTheme === 'festive' }" @click="setTheme('festive')">
+                        <div class="color-dot" style="background:#e11d48"></div> 节日红 (新)
+                    </div>
+                    <div class="style-btn" :class="{ active: currentTheme === 'luxury' }" @click="setTheme('luxury')">
+                        <div class="color-dot" style="background:#d4af37"></div> 黑金奢 (新)
+                    </div>
+                </div>
+
+                <div class="toolbar">
+                    <div class="tool-row">
+                        <button class="tool-btn" @click="insertFormat('## ', '')">H1 大标题</button>
+                        <button class="tool-btn" @click="insertFormat('### ', '')">H2 小标题</button>
+                        <button class="tool-btn" @click="insertFormat('**', '**')">B 加粗</button>
+                        <button class="tool-btn" @click="insertFormat('> ', '')">“ 引用框</button>
+                        <button class="tool-btn" style="color:#d9534f" @click="clearInput">🗑 清空</button>
+                    </div>
+                    <div class="tool-row" style="border-top:1px dashed #eee; padding-top:8px;">
+                        <span style="font-size:12px; color:#999;">常用表情：</span>
+                        <span class="emoji-btn" @click="insertEmoji('🎉')">🎉</span>
+                        <span class="emoji-btn" @click="insertEmoji('🌹')">🌹</span>
+                        <span class="emoji-btn" @click="insertEmoji('👍')">👍</span>
+                        <span class="emoji-btn" @click="insertEmoji('💪')">💪</span>
+                        <span class="emoji-btn" @click="insertEmoji('🤝')">🤝</span>
+                        <span class="emoji-btn" @click="insertEmoji('✨')">✨</span>
+                        <span class="emoji-btn" @click="insertEmoji('📢')">📢</span>
+                        <span class="emoji-btn" @click="insertEmoji('🧧')">🧧</span>
+                        <span class="emoji-btn" @click="insertEmoji('💡')">💡</span>
+                    </div>
                 </div>
                 
-                <div class="editor-wrapper">
-                    <textarea v-model="input" @input="render" placeholder="在这里输入文字..."></textarea>
-                </div>
-                <div style="margin-top: 10px; color: #999; font-size: 12px; text-align: right;">
-                    输入 ## 为标题，输入 ** 为加粗
+                <div class="editor-area">
+                    <textarea id="my-textarea" v-model="input" @input="render" placeholder="请在这里粘贴文字..."></textarea>
                 </div>
             </div>
 
@@ -92,101 +161,116 @@
 
         createApp({
             setup() {
-                const input = ref('## 欢迎使用极速版\n\n左边输入内容，右边**实时预览**。\n\n> 这是一个引用块，即使在网速慢的时候也能正常显示。\n\n我们移除了复杂的插件，确保这套代码在任何电脑上都能跑起来！');
+                const input = ref('## 欢迎使用终极版\n\n我们根据您的建议，增加了**字号调节**和**表情包**功能。\n\n🎉 试着拖动上方的滑块，看看字号的变化！\n\n> 这是一个引用框，即使在调节字号后，排版依然完美。\n\n### 这是一个小标题\n\n👇 点击上方的“节日红”，瞬间变成喜庆风格，非常适合过年过节发文章。');
                 const output = ref('');
-                const currentTheme = ref('life');
+                const currentTheme = ref('business');
                 const copyText = ref('复制到公众号');
+                
+                // 新增：全局设置状态
+                const baseFontSize = ref(16);
+                const lineHeight = ref(1.7);
 
-                // --- 1. 手动定义样式库 (稳如泰山，不依赖插件) ---
-                // 我们直接把 style 属性写成字符串，这样浏览器渲染和复制都绝对没问题
-                const styles = {
-                    life: {
-                        h2: 'font-size: 17px; font-weight: bold; color: #d46b08; background: #fff7e6; padding: 10px 15px; border-radius: 6px; margin: 25px 0 15px; display: table;',
-                        p: 'font-size: 16px; color: #333; line-height: 1.8; margin-bottom: 20px; text-align: justify;',
-                        strong: 'color: #d46b08; font-weight: bold;',
-                        blockquote: 'font-size: 15px; color: #666; background: #fffbe6; border-left: 4px solid #d46b08; padding: 15px; margin: 20px 0; border-radius: 4px;'
-                    },
-                    tech: {
-                        h2: 'font-size: 18px; font-weight: bold; color: #1890ff; border-left: 5px solid #1890ff; padding-left: 12px; margin: 30px 0 15px; background: linear-gradient(to right, #e6f7ff, transparent); padding-top:5px; padding-bottom:5px;',
-                        p: 'font-size: 16px; color: #222; line-height: 1.75; margin-bottom: 20px; text-align: justify;',
-                        strong: 'color: #1890ff; font-weight: bold;',
-                        blockquote: 'font-size: 15px; color: #555; background: #f0f5ff; border: 1px solid #adc6ff; padding: 15px; margin: 20px 0; border-radius: 6px;'
-                    },
-                    simple: {
-                        h2: 'font-size: 16px; font-weight: bold; color: #fff; background: #07c160; padding: 6px 15px; border-radius: 20px; margin: 25px 0 15px; display: inline-block; box-shadow: 0 4px 6px rgba(7,193,96,0.2);',
-                        p: 'font-size: 16px; color: #333; line-height: 1.8; margin-bottom: 20px;',
-                        strong: 'color: #07c160; border-bottom: 2px solid #07c160;',
-                        blockquote: 'font-size: 15px; color: #555; padding: 15px; border: 2px dashed #07c160; border-radius: 8px; margin: 20px 0;'
-                    },
-                    art: {
-                        h2: 'font-size: 18px; font-weight: normal; color: #722ed1; text-align: center; border-top: 1px solid #d3adf7; border-bottom: 1px solid #d3adf7; padding: 10px 0; margin: 35px 0 20px; letter-spacing: 2px;',
-                        p: 'font-size: 16px; color: #555; line-height: 2.0; margin-bottom: 25px; text-align: center;',
-                        strong: 'color: #722ed1;',
-                        blockquote: 'font-size: 15px; color: #722ed1; font-family: STKaiti, KaiTi, serif; margin: 30px 20px; font-style: italic;'
-                    }
+                // --- 样式生成器 (根据字号动态生成) ---
+                const getStyles = (theme, size, height) => {
+                    const commonP = `font-size: ${size}px; line-height: ${height}; margin-bottom: 20px; text-align: justify; color: #333;`;
+                    
+                    const themes = {
+                        business: {
+                            h2: `font-size: ${size * 1.15}px; color: #1f2937; margin: 30px 0 15px; padding-left: 12px; border-left: 6px solid #2563eb; background: linear-gradient(90deg, #eff6ff, transparent); padding-top:4px; padding-bottom:4px; font-weight: bold;`,
+                            h3: `font-size: ${size}px; color: #2563eb; margin: 20px 0 10px; font-weight: bold;`,
+                            strong: `color: #2563eb; font-weight: bold; background: #eff6ff; padding: 0 2px;`,
+                            blockquote: `margin: 20px 0; padding: 15px; background: #f8fafc; border-left: 4px solid #94a3b8; color: #666; font-size: ${size * 0.95}px;`
+                        },
+                        warm: {
+                            h2: `font-size: ${size * 1.15}px; color: #92400e; margin: 30px auto 20px; text-align: center; background: #fffbeb; padding: 8px 20px; border-radius: 50px; display: table; font-weight: bold; border: 1px solid #fde68a;`,
+                            h3: `font-size: ${size}px; color: #b45309; border-bottom: 2px solid #fde68a; display: inline-block; margin-top:20px; font-weight: bold;`,
+                            strong: `color: #d97706; font-weight: bold;`,
+                            blockquote: `margin: 20px 10px; padding: 20px; background: #fff7ed; border-radius: 12px; color: #78350f; border: 1px dashed #fdba74; font-size: ${size * 0.95}px;`
+                        },
+                        clean: {
+                            h2: `font-size: ${size * 1.12}px; color: #fff; margin: 30px 0 15px; background: #059669; padding: 8px 16px; border-radius: 6px; display: inline-block; box-shadow: 0 4px 6px rgba(5,150,105,0.2); font-weight: bold;`,
+                            h3: `font-size: ${size}px; color: #059669; border-left: 4px solid #059669; padding-left: 8px; margin-top:20px; font-weight: bold;`,
+                            strong: `color: #059669; border-bottom: 2px solid #059669;`,
+                            blockquote: `margin: 20px 0; padding: 5px 15px; border-left: 3px solid #10b981; color: #666; background: #ecfdf5; font-size: ${size * 0.95}px;`
+                        },
+                        festive: { // 新增：节日红
+                            h2: `font-size: ${size * 1.15}px; color: #b91c1c; margin: 30px 0 15px; text-align: center; background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='10' cy='10' r='1' fill='%23e5e7eb'/%3E%3C/svg%3E"); border-top: 2px solid #b91c1c; border-bottom: 2px solid #b91c1c; padding: 10px 0; font-weight: bold;`,
+                            h3: `font-size: ${size}px; color: #c02626; margin: 20px 0; display: table; background: #fee2e2; padding: 4px 10px; border-radius: 4px; font-weight: bold;`,
+                            strong: `color: #b91c1c; font-weight: bold; text-decoration: underline; text-decoration-color: #fca5a5;`,
+                            blockquote: `margin: 20px 0; padding: 15px; border: 2px solid #fecaca; border-radius: 8px; color: #991b1b; background: #fff5f5; font-size: ${size * 0.95}px;`
+                        },
+                        luxury: { // 新增：黑金奢
+                            h2: `font-size: ${size * 1.15}px; color: #d4af37; margin: 30px 0 15px; background: #1c1917; padding: 10px 20px; border-radius: 2px; text-align: center; letter-spacing: 2px; font-weight: bold;`,
+                            h3: `font-size: ${size}px; color: #1c1917; margin: 20px 0 10px; border-bottom: 1px solid #d4af37; padding-bottom: 5px; display: inline-block; font-weight: bold;`,
+                            strong: `color: #d4af37; background: #1c1917; padding: 0 4px; font-weight: bold;`,
+                            blockquote: `margin: 20px 0; padding: 20px; border: 1px solid #d4af37; color: #444; font-family: serif; text-align: center; font-style: italic; font-size: ${size * 0.95}px;`
+                        }
+                    };
+                    return { commonP, ...themes[theme] };
                 };
 
-                // --- 2. 核心渲染器 (不依赖 Juice，手写替换) ---
-                // 这个函数把 Markdown 生成的普通 HTML 标签，替换成带 style 的标签
+                // --- 渲染核心 ---
                 const render = () => {
-                    // 检查库是否加载
-                    if (typeof marked === 'undefined') {
-                        output.value = '<p style="color:red; text-align:center; margin-top:50px;">正在加载资源，请稍等...</p>';
-                        return;
-                    }
-
-                    // 1. 转 HTML
+                    if (typeof marked === 'undefined') return;
                     let html = marked.parse(input.value);
+                    const s = getStyles(currentTheme.value, baseFontSize.value, lineHeight.value);
 
-                    // 2. 获取当前主题样式
-                    const s = styles[currentTheme.value];
-
-                    // 3. 暴力替换 (最稳的方法) -> 给标签加 style
-                    // 替换 H2
+                    // 替换标签并注入样式
                     html = html.replace(/<h2>/g, `<h2 style="${s.h2}">`);
-                    // 替换 P (注意不替换已经在 blockquote 里的 p)
-                    html = html.replace(/<p>/g, `<p style="${s.p}">`);
-                    // 替换 Strong
+                    html = html.replace(/<h3>/g, `<h3 style="${s.h3}">`);
+                    html = html.replace(/<p>/g, `<p style="${s.commonP}">`);
                     html = html.replace(/<strong>/g, `<strong style="${s.strong}">`);
-                    // 替换 Blockquote
                     html = html.replace(/<blockquote>/g, `<blockquote style="${s.blockquote}">`);
-                    // 修复图片
-                    html = html.replace(/<img/g, '<img style="max-width:100%; height:auto; border-radius:6px; display:block; margin:10px auto;"');
+                    html = html.replace(/<img/g, '<img style="max-width:100%; height:auto; border-radius:6px; display:block; margin:15px auto; box-shadow:0 2px 10px rgba(0,0,0,0.1);"');
 
                     output.value = html;
                 };
 
-                const setTheme = (key) => {
-                    currentTheme.value = key;
+                // 辅助功能：插入文字/表情
+                const insertTextAtCursor = (textToInsert) => {
+                    const textarea = document.getElementById('my-textarea');
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const text = input.value;
+                    input.value = text.substring(0, start) + textToInsert + text.substring(end);
+                    render();
+                    setTimeout(() => {
+                        textarea.focus();
+                        textarea.setSelectionRange(start + textToInsert.length, start + textToInsert.length);
+                    }, 0);
+                };
+
+                const insertFormat = (prefix, suffix) => {
+                    const textarea = document.getElementById('my-textarea');
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const selection = input.value.substring(start, end);
+                    // 简单判断避免重复
+                    if (!selection) return; 
+                    const replacement = prefix + selection + suffix;
+                    input.value = input.value.substring(0, start) + replacement + input.value.substring(end);
                     render();
                 };
+
+                const insertEmoji = (emoji) => insertTextAtCursor(emoji);
+                const setTheme = (key) => { currentTheme.value = key; render(); };
+                const clearInput = () => { if(confirm('确定清空?')) { input.value = ''; render(); } };
 
                 const copyResult = async () => {
                     const el = document.getElementById('wx-preview');
                     try {
-                        // 复制 HTML
                         const blob = new Blob([el.innerHTML], { type: 'text/html' });
                         await navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })]);
-                        
-                        copyText.value = '✅ 复制成功!';
+                        copyText.value = '✅ 复制成功';
                         setTimeout(() => copyText.value = '复制到公众号', 2000);
-                    } catch (e) {
-                        alert('复制失败，请手动选中右侧内容复制');
-                    }
+                    } catch (e) { alert('复制失败，请手动全选复制'); }
                 };
 
-                // 启动
                 onMounted(() => {
-                    // 简单轮询检查 marked 是否加载完成 (解决网速慢的问题)
-                    const checkInterval = setInterval(() => {
-                        if (typeof marked !== 'undefined') {
-                            render();
-                            clearInterval(checkInterval);
-                        }
-                    }, 200);
+                    setInterval(() => { if (typeof marked !== 'undefined') render(); }, 500);
                 });
 
-                return { input, output, currentTheme, setTheme, render, copyResult, copyText };
+                return { input, output, currentTheme, setTheme, render, copyResult, copyText, insertFormat, clearInput, insertEmoji, baseFontSize, lineHeight };
             }
         }).mount('#app');
     </script>
