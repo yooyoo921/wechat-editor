@@ -3,163 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>公众号排版大师 - 最终验收版</title>
-    <script src="https://cdn.staticfile.org/vue/3.3.4/vue.global.prod.min.js"></script>
-    <script src="https://cdn.staticfile.org/marked/9.1.2/marked.min.js"></script>
+    <title>公众号排版大师 - 稳定版</title>
+    <script src="https://lib.baomitu.com/vue/3.3.4/vue.global.prod.min.js"></script>
+    <script src="https://lib.baomitu.com/marked/9.1.2/marked.min.js"></script>
     
     <style>
-        /* --- 基础布局 (已修复底部遮挡与长文滚动) --- */
+        /* --- 布局系统 --- */
         * { box-sizing: border-box; }
         body { 
-            margin: 0; 
-            background: #f0f2f5; 
-            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; 
-            height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            color: #333; 
-            overflow: hidden; 
+            margin: 0; background: #f5f7fa; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; 
+            height: 100vh; display: flex; flex-direction: column; color: #333; overflow: hidden; 
         }
         
         /* 顶部导航 */
         .header { 
-            background: white; 
-            padding: 0 24px; 
-            height: 64px; 
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            flex-shrink: 0; 
-            z-index: 100; 
+            background: white; padding: 0 24px; height: 60px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+            display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; z-index: 100; 
         }
-        .logo { font-size: 20px; font-weight: 800; color: #333; display: flex; align-items: center; letter-spacing: 1px; }
-        .logo span { color: #07c160; margin-left: 8px; background: #e6f7ef; padding: 4px 8px; border-radius: 6px; font-size: 13px; font-weight: 600; }
-        .btn-copy { 
-            background: #07c160; color: white; border: none; padding: 10px 24px; border-radius: 6px; 
-            font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 15px; 
-            box-shadow: 0 4px 12px rgba(7, 193, 96, 0.3);
-        }
+        .logo { font-size: 18px; font-weight: 800; color: #333; display: flex; align-items: center; }
+        .logo span { color: #fff; background: #07c160; padding: 2px 6px; border-radius: 4px; font-size: 12px; margin-left: 8px; }
+        
+        .header-btns { display: flex; gap: 10px; }
+        .btn-base { border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s; }
+        .btn-donate { background: #fff0f6; color: #eb2f96; }
+        .btn-donate:hover { background: #ffadd2; color: #fff; }
+        .btn-copy { background: #07c160; color: white; box-shadow: 0 4px 10px rgba(7, 193, 96, 0.2); }
         .btn-copy:hover { background: #06ad56; transform: translateY(-1px); }
-        .btn-copy:active { transform: translateY(0); }
 
-        /* 主工作区 */
+        /* 主区域 */
         .workspace { 
-            flex: 1; 
-            display: flex; 
-            gap: 24px; 
-            padding: 24px; 
-            width: 100%; 
-            max-width: 1600px; 
-            margin: 0 auto; 
-            min-height: 0; 
+            flex: 1; display: flex; gap: 20px; padding: 20px; width: 100%; max-width: 1400px; margin: 0 auto; min-height: 0; 
         }
         
         /* 左侧面板 */
         .panel-left { 
-            flex: 1; 
-            background: white; 
-            border-radius: 12px; 
-            display: flex; 
-            flex-direction: column; 
-            border: 1px solid #e1e4e8; 
-            overflow: hidden; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
+            flex: 1; background: white; border-radius: 12px; display: flex; flex-direction: column; 
+            border: 1px solid #e8e8e8; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02); 
         }
+        .toolbar { padding: 12px 16px; background: #fafafa; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 12px; }
         
-        /* 操作栏 */
-        .control-bar { padding: 16px; background: #fafafa; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 14px; }
-        
-        /* 风格按钮组 */
-        .style-group { display: flex; gap: 10px; flex-wrap: wrap; }
-        .style-btn { 
-            padding: 6px 14px; border: 1px solid #e0e0e0; border-radius: 6px; cursor: pointer; 
-            font-size: 14px; background: white; color: #555; display: flex; align-items: center; gap: 6px; transition: all 0.2s; 
+        /* 风格按钮 */
+        .style-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
+        .style-tag { 
+            padding: 4px 12px; border: 1px solid #d9d9d9; border-radius: 4px; cursor: pointer; font-size: 13px; white-space: nowrap; background: white; 
         }
-        .style-btn:hover { border-color: #07c160; color: #07c160; }
-        .style-btn.active { border-color: #07c160; color: #07c160; background: #e6f7ef; font-weight: bold; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; }
+        .style-tag:hover { color: #07c160; border-color: #07c160; }
+        .style-tag.active { color: #07c160; border-color: #07c160; background: #f6ffed; font-weight: bold; }
 
-        /* 工具按钮组 */
-        .tool-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        /* 工具按钮 */
+        .format-row { display: flex; gap: 8px; flex-wrap: wrap; }
         .tool-btn { 
-            padding: 8px 16px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; 
-            cursor: pointer; font-size: 14px; font-weight: 600; color: #333; display: flex; align-items: center; gap: 6px; 
-            transition: all 0.2s;
+            padding: 6px 12px; border: 1px solid #d9d9d9; border-radius: 4px; background: white; cursor: pointer; font-size: 13px; font-weight: 500; 
         }
-        .tool-btn:hover { background: #f5f5f5; border-color: #ccc; }
+        .tool-btn:hover { background: #f5f5f5; }
         .tool-btn.danger { color: #ff4d4f; border-color: #ffccc7; margin-left: auto; }
-        .tool-btn.danger:hover { background: #fff1f0; }
 
-        /* 输入区域 */
-        .editor-container { flex: 1; position: relative; display: flex; flex-direction: column; min-height: 0; }
-        .tip-bar { background: #fffbe6; color: #d46b08; padding: 10px 16px; font-size: 13px; border-bottom: 1px solid #ffe58f; display: flex; align-items: center; gap: 6px; }
+        /* 编辑器 */
+        .editor-box { flex: 1; position: relative; display: flex; flex-direction: column; }
+        .notice-bar { background: #fffbe6; color: #d46b08; padding: 8px 16px; font-size: 12px; border-bottom: 1px solid #ffe58f; }
         textarea { 
-            flex: 1; width: 100%; border: none; padding: 24px; resize: none; outline: none; 
-            font-size: 16px; line-height: 1.75; color: #1a1a1a; font-family: monospace;
-            overflow-y: auto; 
+            flex: 1; width: 100%; border: none; padding: 20px; resize: none; outline: none; 
+            font-size: 16px; line-height: 1.7; color: #333; font-family: monospace;
         }
 
-        /* 右侧面板 */
-        .panel-right { 
-            width: 420px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            flex-shrink: 0; 
-            height: 100%; 
-            justify-content: center; 
+        /* 右侧预览 */
+        .panel-right { width: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; flex-shrink: 0; }
+        .phone { 
+            width: 375px; height: 100%; background: white; border: 12px solid #333; border-radius: 40px; 
+            overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2); 
+        }
+        .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 150px; height: 24px; background: #333; border-radius: 0 0 16px 16px; z-index: 10; }
+        .preview-content { 
+            flex: 1; overflow-y: auto; padding: 20px; word-wrap: break-word; background: #fff; padding-bottom: 50px; 
         }
         
-        .phone-mockup { 
-            width: 375px; 
-            height: 100%; 
-            background: white; 
-            border: 12px solid #333; 
-            border-radius: 40px; 
-            position: relative; 
-            display: flex; 
-            flex-direction: column; 
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); 
-            overflow: hidden; 
-        }
-        .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 140px; height: 24px; background: #333; border-radius: 0 0 16px 16px; z-index: 20; }
-        
-        .preview-area { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 24px; 
-            background: #fff; 
-            word-wrap: break-word; 
-            padding-bottom: 60px; /* 底部留白，防遮挡 */
-        }
-        
-        /* 滚动条美化 */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
+        /* 弹窗 */
+        .modal-mask { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: flex; justify-content: center; align-items: center; }
+        .modal { background: white; padding: 24px; border-radius: 12px; width: 300px; text-align: center; }
+        .qr-placeholder { width: 150px; height: 150px; background: #f0f0f0; margin: 16px auto; display: flex; align-items: center; justify-content: center; color: #999; border-radius: 8px; }
 
-        /* 移动端适配 */
+        /* 滚动条 */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
         @media (max-width: 900px) {
             body { height: auto; overflow-y: auto; }
-            .workspace { flex-direction: column; padding: 16px; gap: 30px; height: auto; }
-            .panel-left { height: 500px; } 
-            .panel-right { width: 100%; height: 750px; padding-bottom: 40px; }
-            .phone-mockup { width: 100%; border-width: 4px; border-radius: 16px; }
-            .header { padding: 0 16px; }
-            .tool-btn.danger { margin-left: 0; width: 100%; justify-content: center; }
+            .workspace { flex-direction: column; padding: 10px; height: auto; }
+            .panel-left { height: 500px; }
+            .panel-right { width: 100%; height: 700px; padding-bottom: 30px; }
+            .phone { border-width: 2px; border-radius: 12px; }
         }
     </style>
 </head>
 <body>
     <div id="app">
+        <div class="modal-mask" v-if="showPay" @click.self="showPay = false">
+            <div class="modal">
+                <h3 style="margin-top:0;">☕️ 支持作者</h3>
+                <p style="font-size:13px; color:#666;">您的支持是我维护的动力</p>
+                <div class="qr-placeholder">
+                    <img src="https://via.placeholder.com/150?text=QRCode" style="width:100%; border-radius:8px;">
+                </div>
+                <button class="btn-base" @click="showPay = false" style="background:#eee; margin-top:10px;">关闭</button>
+            </div>
+        </div>
+
         <header class="header">
-            <div class="logo">公众号排版大师 <span>验收版</span></div>
-            <button class="btn-copy" @click="copyResult">{{ copyText }}</button>
+            <div class="logo">公众号排版大师 <span>Pro</span></div>
+            <div class="header-btns">
+                <button class="btn-base btn-donate" @click="showPay = true">☕️ 打赏</button>
+                <button class="btn-base btn-copy" @click="copyHtml">{{ copyText }}</button>
+            </div>
         </header>
 
         <div class="workspace">
             <div class="panel-left">
-                <div class="control-bar">
-                    <div class="style-group">
-                        <div class="style-btn" :
+                <div class="toolbar">
+                    <div class="style-row">
+                        <div class="style-tag" :class="{active: theme==='business'}" @click="setTheme('business')">🔵 商务蓝</div>
+                        <div class="style-tag" :class="{active: theme==='warm'}" @click="setTheme('warm')">🟠 生活暖</div>
+                        <div class="style-tag" :class="{active: theme==='clean'}" @click="setTheme('clean')">🟢 简约绿</div>
+                        <div class="style-tag" :class="{active: theme==='festive'}" @click="setTheme('festive')">🔴 节日红</div>
+                        <div style="margin-left:auto; display:flex; align-items:center; font-size:12px; gap:5px;">
+                            字号 <input type="range" min="14" max="20" v-model="fontSize" @input="render">
+                        </div>
+                    </div>
+                    <div class="format-row">
+                        <button class="tool-btn" @click="insert('## ', '')">📝 标题</button>
+                        <button class="tool-btn" @click="insert('**', '**')">B 加粗</button>
+                        <button class="tool-btn" @click="insert('> ', '')">💬 引用</button>
+                        <button class="tool-btn danger" @click="clear">🗑 清空</button>
+                    </div>
+                </div>
+                <div class="editor-box">
+                    <div class="notice-bar">💡 提示：直接粘贴文字即可，系统会自动智能分段。</div>
+                    <textarea id="editor" v-model="input" @input="render" placeholder="在此输入内容..."></textarea>
+                </div>
+            </div>
+
+            <div class="panel-right">
+                <div class="phone">
+                    <div class="notch"></div>
+                    <div class="preview-content" id="preview" v-html="output"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 2. 增加错误拦截，如果加载失败会弹窗提示
+        window.onerror = function() {
+            alert("系统组件加载慢，请尝试刷新页面 (Ctrl+R)");
+        };
+
+        const { createApp, ref, onMounted } = Vue;
+
+        createApp({
+            setup() {
+                const input = ref('## 欢迎使用\n\n如果看到这个页面，说明**修复成功**了！\n\n1. 我们更换了更快的国内服务器。\n2. 解决了乱码问题。\n
