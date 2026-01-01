@@ -3,147 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>公众号排版大师 - 完美适配版</title>
+    <title>公众号排版大师 - 最终验收版</title>
     <script src="https://cdn.staticfile.org/vue/3.3.4/vue.global.prod.min.js"></script>
     <script src="https://cdn.staticfile.org/marked/9.1.2/marked.min.js"></script>
     
     <style>
-        /* --- 1. 布局修复核心 (解决底部被切掉的问题) --- */
+        /* --- 基础布局 (已修复底部遮挡与长文滚动) --- */
         * { box-sizing: border-box; }
         body { 
             margin: 0; 
             background: #f0f2f5; 
-            font-family: "PingFang SC", "Microsoft YaHei", sans-serif; 
-            height: 100vh; /* 占满全屏 */
+            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; 
+            height: 100vh; 
             display: flex; 
             flex-direction: column; 
             color: #333; 
-            overflow: hidden; /* 防止出现双重滚动条 */
+            overflow: hidden; 
         }
         
         /* 顶部导航 */
         .header { 
             background: white; 
-            padding: 0 20px; 
-            height: 60px; /* 固定高度 */
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+            padding: 0 24px; 
+            height: 64px; 
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08); 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             flex-shrink: 0; 
-            z-index: 10; 
+            z-index: 100; 
         }
-        .logo { font-size: 18px; font-weight: 800; color: #333; display: flex; align-items: center; }
-        .logo span { color: #07c160; margin-left: 5px; background: #e6f7ef; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
-        .btn-copy { background: #07c160; color: white; border: none; padding: 8px 24px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .logo { font-size: 20px; font-weight: 800; color: #333; display: flex; align-items: center; letter-spacing: 1px; }
+        .logo span { color: #07c160; margin-left: 8px; background: #e6f7ef; padding: 4px 8px; border-radius: 6px; font-size: 13px; font-weight: 600; }
+        .btn-copy { 
+            background: #07c160; color: white; border: none; padding: 10px 24px; border-radius: 6px; 
+            font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 15px; 
+            box-shadow: 0 4px 12px rgba(7, 193, 96, 0.3);
+        }
         .btn-copy:hover { background: #06ad56; transform: translateY(-1px); }
+        .btn-copy:active { transform: translateY(0); }
 
-        /* 主工作区 (关键修复点) */
+        /* 主工作区 */
         .workspace { 
             flex: 1; 
             display: flex; 
-            gap: 20px; 
-            padding: 20px; 
-            padding-bottom: 25px; /* 底部增加安全距离 */
+            gap: 24px; 
+            padding: 24px; 
             width: 100%; 
             max-width: 1600px; 
             margin: 0 auto; 
-            min-height: 0; /* 允许子元素压缩 */
-            height: calc(100vh - 60px); /* 精确计算剩余高度 */
+            min-height: 0; 
         }
         
         /* 左侧面板 */
         .panel-left { 
             flex: 1; 
             background: white; 
-            border-radius: 8px; 
+            border-radius: 12px; 
             display: flex; 
             flex-direction: column; 
             border: 1px solid #e1e4e8; 
             overflow: hidden; 
-            box-shadow: 0 2px 6px rgba(0,0,0,0.02); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); 
         }
         
         /* 操作栏 */
-        .control-bar { padding: 15px; background: #fcfcfc; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 12px; }
+        .control-bar { padding: 16px; background: #fafafa; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 14px; }
         
-        /* 风格按钮 */
-        .style-group { display: flex; gap: 8px; flex-wrap: wrap; }
-        .style-btn { padding: 6px 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 13px; background: white; color: #555; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        /* 风格按钮组 */
+        .style-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .style-btn { 
+            padding: 6px 14px; border: 1px solid #e0e0e0; border-radius: 6px; cursor: pointer; 
+            font-size: 14px; background: white; color: #555; display: flex; align-items: center; gap: 6px; transition: all 0.2s; 
+        }
         .style-btn:hover { border-color: #07c160; color: #07c160; }
         .style-btn.active { border-color: #07c160; color: #07c160; background: #e6f7ef; font-weight: bold; }
         .dot { width: 8px; height: 8px; border-radius: 50%; }
 
-        /* 工具按钮 */
-        .tool-group { display: flex; gap: 8px; flex-wrap: wrap; }
-        .tool-btn { padding: 6px 12px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; color: #333; display: flex; align-items: center; gap: 4px; }
-        .tool-btn:hover { background: #f5f5f5; }
-        .tool-btn.danger { color: #ff4d4f; border-color: #ffccc7; }
+        /* 工具按钮组 */
+        .tool-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .tool-btn { 
+            padding: 8px 16px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; 
+            cursor: pointer; font-size: 14px; font-weight: 600; color: #333; display: flex; align-items: center; gap: 6px; 
+            transition: all 0.2s;
+        }
+        .tool-btn:hover { background: #f5f5f5; border-color: #ccc; }
+        .tool-btn.danger { color: #ff4d4f; border-color: #ffccc7; margin-left: auto; }
         .tool-btn.danger:hover { background: #fff1f0; }
 
         /* 输入区域 */
         .editor-container { flex: 1; position: relative; display: flex; flex-direction: column; min-height: 0; }
-        .tip-bar { background: #fffbe6; color: #d46b08; padding: 8px 15px; font-size: 12px; border-bottom: 1px solid #ffe58f; display: flex; align-items: center; }
+        .tip-bar { background: #fffbe6; color: #d46b08; padding: 10px 16px; font-size: 13px; border-bottom: 1px solid #ffe58f; display: flex; align-items: center; gap: 6px; }
         textarea { 
-            flex: 1; width: 100%; border: none; padding: 20px; resize: none; outline: none; 
-            font-size: 16px; line-height: 1.8; color: #333; font-family: monospace;
-            overflow-y: auto; /* 内部滚动 */
+            flex: 1; width: 100%; border: none; padding: 24px; resize: none; outline: none; 
+            font-size: 16px; line-height: 1.75; color: #1a1a1a; font-family: monospace;
+            overflow-y: auto; 
         }
 
-        /* 右侧面板 (关键修复点) */
+        /* 右侧面板 */
         .panel-right { 
-            width: 400px; 
+            width: 420px; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
             flex-shrink: 0; 
-            height: 100%; /* 跟随父容器高度 */
-            justify-content: center; /* 垂直居中 */
+            height: 100%; 
+            justify-content: center; 
         }
         
         .phone-mockup { 
             width: 375px; 
-            height: 100%; /* 占满右侧面板的高度 */
-            max-height: 100%; /* 【重点修复】去掉具体的850px限制，改为自适应 */
+            height: 100%; 
             background: white; 
             border: 12px solid #333; 
-            border-radius: 30px; 
+            border-radius: 40px; 
             position: relative; 
             display: flex; 
             flex-direction: column; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15); 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); 
             overflow: hidden; 
         }
-        .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 20px; background: #333; border-radius: 0 0 12px 12px; z-index: 20; }
+        .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 140px; height: 24px; background: #333; border-radius: 0 0 16px 16px; z-index: 20; }
+        
         .preview-area { 
             flex: 1; 
-            overflow-y: auto; /* 预览区内部滚动 */
-            padding: 20px; 
+            overflow-y: auto; 
+            padding: 24px; 
             background: #fff; 
             word-wrap: break-word; 
-            padding-bottom: 50px; /* 底部留白，防止字贴底 */
+            padding-bottom: 60px; /* 底部留白，防遮挡 */
         }
         
         /* 滚动条美化 */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
 
-        /* 移动端适配 (手机上允许网页整体滚动) */
+        /* 移动端适配 */
         @media (max-width: 900px) {
             body { height: auto; overflow-y: auto; }
-            .workspace { flex-direction: column; padding: 10px; gap: 30px; height: auto; }
+            .workspace { flex-direction: column; padding: 16px; gap: 30px; height: auto; }
             .panel-left { height: 500px; } 
-            .panel-right { width: 100%; height: 700px; padding-bottom: 30px; }
-            .phone-mockup { width: 100%; height: 100%; max-height: none; border-width: 2px; border-radius: 10px; }
-            .header { padding: 0 15px; }
+            .panel-right { width: 100%; height: 750px; padding-bottom: 40px; }
+            .phone-mockup { width: 100%; border-width: 4px; border-radius: 16px; }
+            .header { padding: 0 16px; }
+            .tool-btn.danger { margin-left: 0; width: 100%; justify-content: center; }
         }
     </style>
 </head>
 <body>
     <div id="app">
         <header class="header">
-            <div class="logo">公众号排版大师 <span>完美适配版</span></div>
+            <div class="logo">公众号排版大师 <span>验收版</span></div>
             <button class="btn-copy" @click="copyResult">{{ copyText }}</button>
         </header>
 
@@ -151,160 +162,4 @@
             <div class="panel-left">
                 <div class="control-bar">
                     <div class="style-group">
-                        <div class="style-btn" :class="{ active: currentTheme === 'business' }" @click="setTheme('business')">
-                            <div class="dot" style="background:#1890ff"></div> 商务蓝
-                        </div>
-                        <div class="style-btn" :class="{ active: currentTheme === 'warm' }" @click="setTheme('warm')">
-                            <div class="dot" style="background:#f59e0b"></div> 生活暖
-                        </div>
-                        <div class="style-btn" :class="{ active: currentTheme === 'clean' }" @click="setTheme('clean')">
-                            <div class="dot" style="background:#059669"></div> 简约绿
-                        </div>
-                        <div class="style-btn" :class="{ active: currentTheme === 'festive' }" @click="setTheme('festive')">
-                            <div class="dot" style="background:#e11d48"></div> 节日红
-                        </div>
-                        <div style="flex:1"></div>
-                        <span style="font-size:12px; color:#666;">字号:</span>
-                        <input type="range" min="14" max="20" step="1" v-model="fontSize" @input="render" style="width:80px">
-                    </div>
-
-                    <div class="tool-group">
-                        <button class="tool-btn" @click="insertFormat('## ', '')">📝 大标题</button>
-                        <button class="tool-btn" @click="insertFormat('### ', '')">📌 小标题</button>
-                        <button class="tool-btn" @click="insertFormat('**', '**')">🔠 加粗</button>
-                        <button class="tool-btn" @click="insertFormat('> ', '')">💬 引用</button>
-                        <div style="flex:1"></div>
-                        <button class="tool-btn danger" @click="clearInput">🗑 清空</button>
-                    </div>
-                </div>
-
-                <div class="editor-container">
-                    <div class="tip-bar">
-                        💡 使用方法：用鼠标选中文字，然后点击上方的按钮，右边就会自动排版。
-                    </div>
-                    <textarea id="editor" v-model="input" @input="render" placeholder="请在这里输入或粘贴文字..."></textarea>
-                </div>
-            </div>
-
-            <div class="panel-right">
-                <div class="phone-mockup">
-                    <div class="notch"></div>
-                    <div style="text-align:center; padding:15px; color:#999; font-size:12px; border-bottom:1px solid #f0f0f0; margin-top:20px;">
-                        微信预览效果
-                    </div>
-                    <div id="wx-preview" class="preview-area" v-html="output"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const { createApp, ref, onMounted } = Vue;
-
-        createApp({
-            setup() {
-                // 默认示例文案
-                const input = ref('## 终于修复好了\n\n我们彻底解决了**底部被遮挡**的问题。\n\n1. 现在手机框会自动适应您的屏幕高度。\n2. 无论屏幕多小，都不会再“切掉”内容了。\n\n> 这是一个引用框，点击上方按钮即可生成。\n\n### 这是一个小标题\n\n请放心使用，所有代码已通过兼容性测试。');
-                const output = ref('');
-                const currentTheme = ref('business');
-                const copyText = ref('复制到公众号');
-                const fontSize = ref(16);
-
-                // 样式生成工厂
-                const getStyles = (theme, size) => {
-                    // 样式必须加 !important 防止被微信默认样式覆盖
-                    const p = `font-size: ${size}px; line-height: 1.75; margin-bottom: 20px; text-align: justify; color: #333;`;
-                    
-                    const styles = {
-                        business: {
-                            h2: `font-size: ${size * 1.15}px; color: #1f2937; border-left: 6px solid #2563eb; background: #eff6ff; padding: 10px; margin: 30px 0 15px; font-weight: bold; border-radius: 0 4px 4px 0; display:block;`,
-                            h3: `font-size: ${size}px; color: #2563eb; margin: 20px 0 10px; font-weight: bold; border-bottom: 2px solid #eff6ff; display: inline-block;`,
-                            strong: `color: #2563eb; font-weight: bold; background: #eff6ff; padding: 0 4px;`,
-                            blockquote: `background: #f8fafc; border-left: 4px solid #94a3b8; padding: 15px; color: #64748b; margin: 20px 0; border-radius: 4px; font-size: ${size * 0.95}px;`
-                        },
-                        warm: {
-                            h2: `font-size: ${size * 1.15}px; color: #92400e; background: #fffbeb; border: 1px solid #fde68a; padding: 8px 25px; border-radius: 20px; margin: 30px auto 15px; text-align: center; font-weight: bold; display: table;`,
-                            h3: `font-size: ${size}px; color: #b45309; margin: 20px 0 10px; font-weight: bold; padding-left: 10px; border-left: 4px solid #f59e0b;`,
-                            strong: `color: #d97706; font-weight: bold;`,
-                            blockquote: `background: #fff7ed; border: 1px dashed #fdba74; padding: 15px; color: #9a3412; margin: 20px 0; border-radius: 8px; font-size: ${size * 0.95}px;`
-                        },
-                        clean: {
-                            h2: `font-size: ${size * 1.15}px; color: white; background: #059669; padding: 8px 16px; border-radius: 4px; margin: 30px 0 15px; display: inline-block; font-weight: bold; box-shadow: 0 2px 5px rgba(5,150,105,0.3);`,
-                            h3: `font-size: ${size}px; color: #059669; margin: 20px 0 10px; font-weight: bold; padding-bottom: 5px; border-bottom: 1px solid #059669; display: inline-block;`,
-                            strong: `color: #059669; font-weight: bold; border-bottom: 2px solid #059669;`,
-                            blockquote: `border-left: 3px solid #10b981; background: #f0fdf4; padding: 10px 15px; color: #047857; margin: 20px 0; font-size: ${size * 0.95}px;`
-                        },
-                        festive: {
-                            h2: `font-size: ${size * 1.15}px; color: #b91c1c; border-top: 2px solid #b91c1c; border-bottom: 2px solid #b91c1c; padding: 10px 0; margin: 30px 0 15px; text-align: center; font-weight: bold; letter-spacing: 2px; display: block;`,
-                            h3: `font-size: ${size}px; color: #be123c; margin: 20px 0 10px; background: #ffe4e6; padding: 5px 10px; border-radius: 4px; display: inline-block; font-weight: bold;`,
-                            strong: `color: #b91c1c; font-weight: bold; text-decoration: underline; text-decoration-color: #fda4af;`,
-                            blockquote: `border: 2px solid #fecaca; background: #fff1f2; padding: 15px; color: #9f1239; margin: 20px 0; border-radius: 8px; font-size: ${size * 0.95}px;`
-                        }
-                    };
-                    return { p, ...styles[theme] };
-                };
-
-                const render = () => {
-                    if (typeof marked === 'undefined') return;
-                    let html = marked.parse(input.value);
-                    const s = getStyles(currentTheme.value, fontSize.value);
-
-                    // 兼容性修复：强制替换样式
-                    html = html.replace(/<h2/g, `<h2 style="${s.h2}"`)
-                               .replace(/<h3/g, `<h3 style="${s.h3}"`)
-                               .replace(/<p/g, `<p style="${s.p}"`)
-                               .replace(/<strong/g, `<strong style="${s.strong}"`)
-                               .replace(/<blockquote/g, `<blockquote style="${s.blockquote}"`)
-                               .replace(/<img/g, '<img style="max-width:100%; height:auto; border-radius:6px; display:block; margin:10px auto;"');
-                    
-                    output.value = html;
-                };
-
-                const setTheme = (key) => { currentTheme.value = key; render(); };
-
-                const insertFormat = (prefix, suffix) => {
-                    const textarea = document.getElementById('editor');
-                    const start = textarea.selectionStart;
-                    const end = textarea.selectionEnd;
-                    const text = input.value;
-                    const selection = text.substring(start, end);
-                    
-                    const replacement = prefix + selection + suffix;
-                    input.value = text.substring(0, start) + replacement + text.substring(end);
-                    render();
-                    
-                    setTimeout(() => {
-                        textarea.focus();
-                        textarea.setSelectionRange(start + prefix.length, end + prefix.length);
-                    }, 0);
-                };
-
-                const clearInput = () => {
-                    if(confirm('确定要清空所有内容吗？\n此操作无法撤销。')) { 
-                        input.value = ''; 
-                        render(); 
-                    } 
-                };
-
-                const copyResult = async () => {
-                    const el = document.getElementById('wx-preview');
-                    try {
-                        const blob = new Blob([el.innerHTML], { type: 'text/html' });
-                        await navigator.clipboard.write([new ClipboardItem({ 'text/html': blob })]);
-                        copyText.value = '✅ 复制成功';
-                        setTimeout(() => copyText.value = '复制到公众号', 2000);
-                    } catch (e) {
-                        alert('复制失败，请尝试手动全选右侧内容复制');
-                    }
-                };
-
-                onMounted(() => {
-                    setInterval(() => { if(typeof marked !== 'undefined') render(); }, 300);
-                });
-
-                return { input, output, currentTheme, fontSize, setTheme, render, insertFormat, clearInput, copyResult, copyText };
-            }
-        }).mount('#app');
-    </script>
-</body>
-</html>
+                        <div class="style-btn" :
