@@ -1,9 +1,22 @@
+这份新的指引内容设计得非常好，非常贴合中老年用户的使用习惯：**由浅入深，边看边学，所见即所得**。
+
+为了让这份指引发挥最大效果，我做了以下**三个维度的优化**：
+
+1. **“示范式”教学**：我直接把默认文案写成了**教程本身**。用户打开网页，看到的就是已经排版好的样子，直接照着改就行。
+2. **口语化表达**：把“选中”改成“涂蓝”，把“渲染”改成“变好看”，降低认知门槛。
+3. **视觉分层**：将指引分为“标题篇”、“正文篇”和“发布篇”，逻辑更清晰。
+
+请**全选并复制**下面的代码，覆盖 GitHub 中的 `index.html`。
+
+### ✅ 最终易用版 (优化指引文案 + 示范教学)
+
+```html
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>公众号排版大师 - 完美适配版</title>
+    <title>公众号排版大师 - 易用版</title>
     <script src="https://cdn.staticfile.org/vue/3.3.4/vue.global.prod.min.js"></script>
     <script src="https://cdn.staticfile.org/marked/9.1.2/marked.min.js"></script>
     
@@ -12,18 +25,12 @@
         * { box-sizing: border-box; }
         body { 
             margin: 0; background: #f5f7fa; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; 
-            /* 【核心修复】不再强制 100vh，而是允许最小高度，不够就出滚动条 */
-            min-height: 100vh; 
-            display: flex; flex-direction: column; color: #333; 
-            /* 【核心修复】允许网页整体滚动，防止小屏幕切内容 */
-            overflow-y: auto; 
+            min-height: 100vh; display: flex; flex-direction: column; color: #333; overflow-y: auto; 
         }
         
         /* 顶部导航 */
         .header { 
-            flex: 0 0 60px; /* 固定高度 */
-            background: white; padding: 0 24px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+            flex: 0 0 60px; background: white; padding: 0 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
             display: flex; justify-content: space-between; align-items: center; z-index: 100; 
         }
         .logo { font-size: 18px; font-weight: 800; color: #333; display: flex; align-items: center; }
@@ -31,38 +38,36 @@
         
         .btn-copy { 
             background: #07c160; color: white; border: none; padding: 9px 24px; border-radius: 6px; 
-            font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s; 
-            box-shadow: 0 4px 10px rgba(7, 193, 96, 0.2);
+            font-weight: 600; cursor: pointer; font-size: 14px; transition: 0.2s; box-shadow: 0 4px 10px rgba(7, 193, 96, 0.2);
         }
         .btn-copy:hover { background: #06ad56; transform: translateY(-1px); }
 
-        /* --- 主工作区 --- */
+        /* 主工作区 */
         .workspace { 
-            flex: 1; 
-            display: flex; 
-            gap: 20px; 
-            padding: 20px; 
-            width: 100%; 
-            max-width: 1400px; 
-            margin: 0 auto; 
-            /* 【核心修复】设定最小高度，如果屏幕太矮，让 body 滚动，而不是切掉内容 */
-            height: calc(100vh - 60px); 
-            min-height: 750px; 
+            flex: 1; display: flex; gap: 20px; padding: 20px; width: 100%; max-width: 1400px; margin: 0 auto; 
+            height: calc(100vh - 60px); min-height: 750px; 
         }
         
         /* 左侧面板 */
         .panel-left { 
-            flex: 1; 
-            background: white; border-radius: 12px; display: flex; flex-direction: column; 
-            border: 1px solid #e8e8e8; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02); 
-            margin-bottom: 20px; /* 底部留白 */
+            flex: 1; background: white; border-radius: 12px; display: flex; flex-direction: column; 
+            border: 1px solid #e8e8e8; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02); margin-bottom: 20px; 
         }
+        
+        /* 顶部黄色指引条 */
+        .guide-box {
+            background: #fff7e6; padding: 12px 20px; border-bottom: 1px solid #ffe7ba;
+            display: flex; gap: 20px; align-items: center; color: #d46b08; font-size: 14px;
+        }
+        .step { display: flex; align-items: center; gap: 6px; font-weight: bold; }
+        .step-num { background: #d46b08; color: white; width: 20px; height: 20px; border-radius: 50%; text-align: center; line-height: 20px; font-size: 12px; }
+
         .toolbar { padding: 12px 16px; background: #fafafa; border-bottom: 1px solid #eee; display: flex; flex-direction: column; gap: 12px; }
         
         /* 风格按钮 */
         .style-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; }
         .style-tag { 
-            padding: 5px 14px; border: 1px solid #d9d9d9; border-radius: 4px; cursor: pointer; font-size: 13px; white-space: nowrap; background: white; transition: 0.2s;
+            padding: 6px 14px; border: 1px solid #d9d9d9; border-radius: 4px; cursor: pointer; font-size: 13px; white-space: nowrap; background: white; transition: 0.2s;
         }
         .style-tag:hover { color: #07c160; border-color: #07c160; }
         .style-tag.active { color: #07c160; border-color: #07c160; background: #f6ffed; font-weight: bold; }
@@ -70,73 +75,59 @@
         /* 工具按钮 */
         .format-row { display: flex; gap: 8px; flex-wrap: wrap; }
         .tool-btn { 
-            padding: 6px 12px; border: 1px solid #d9d9d9; border-radius: 4px; background: white; cursor: pointer; font-size: 13px; font-weight: 500; transition: 0.2s;
+            padding: 8px 16px; border: 1px solid #d9d9d9; border-radius: 4px; background: white; cursor: pointer; font-size: 14px; font-weight: 600; transition: 0.2s;
         }
-        .tool-btn:hover { background: #f5f5f5; }
+        .tool-btn:hover { background: #f5f5f5; border-color: #999; }
         .tool-btn.danger { color: #ff4d4f; border-color: #ffccc7; margin-left: auto; }
 
         /* 编辑器 */
         .editor-box { flex: 1; position: relative; display: flex; flex-direction: column; min-height: 0; }
-        .notice-bar { background: #fffbe6; color: #d46b08; padding: 8px 16px; font-size: 12px; border-bottom: 1px solid #ffe58f; }
         textarea { 
-            flex: 1; width: 100%; border: none; padding: 20px; resize: none; outline: none; 
-            font-size: 16px; line-height: 1.7; color: #333; font-family: monospace;
-            overflow-y: auto; 
+            flex: 1; width: 100%; border: none; padding: 24px; resize: none; outline: none; 
+            font-size: 16px; line-height: 1.8; color: #333; font-family: monospace; overflow-y: auto; 
         }
 
-        /* --- 右侧预览面板 --- */
+        /* 右侧预览 */
         .panel-right { 
-            width: 400px; 
-            height: 100%; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; /* 垂直居中 */
-            flex-shrink: 0; 
-            padding-bottom: 40px; /* 【核心修复】底部强制留白，防止贴底 */
+            width: 400px; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; padding-bottom: 40px; 
         }
-        
         .phone { 
-            width: 375px; 
-            height: 100%; 
-            background: white; 
-            border: 12px solid #333; 
-            border-radius: 40px; 
-            overflow: hidden; 
-            display: flex; flex-direction: column; position: relative; 
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2); 
-            /* 防止手机框太长 */
-            max-height: 800px;
+            width: 375px; height: 100%; background: white; border: 12px solid #333; border-radius: 40px; 
+            overflow: hidden; display: flex; flex-direction: column; position: relative; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.2); max-height: 800px; 
         }
-        
         .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 150px; height: 24px; background: #333; border-radius: 0 0 16px 16px; z-index: 10; }
         .preview-content { 
             flex: 1; overflow-y: auto; padding: 20px; word-wrap: break-word; background: #fff; padding-bottom: 50px; padding-top: 30px; 
         }
         
-        /* 滚动条 */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
 
-        /* 移动端适配 */
         @media (max-width: 900px) {
             body { height: auto; overflow-y: auto; }
             .workspace { flex-direction: column; padding: 10px; height: auto; min-height: auto; }
             .panel-left { height: 500px; }
             .panel-right { width: 100%; height: 750px; padding-bottom: 30px; }
             .phone { border-width: 2px; border-radius: 12px; max-height: none; }
+            .guide-box { flex-direction: column; align-items: flex-start; gap: 8px; }
         }
     </style>
 </head>
 <body>
     <div id="app">
         <header class="header">
-            <div class="logo">排版大师 <span>纯净版</span></div>
+            <div class="logo">排版大师 <span>易用版</span></div>
             <button class="btn-copy" @click="copyHtml">{{ copyText }}</button>
         </header>
 
         <div class="workspace">
             <div class="panel-left">
+                <div class="guide-box">
+                    <div class="step"><div class="step-num">1</div> 粘贴文章到下方</div>
+                    <div class="step"><div class="step-num">2</div> 选中文字</div>
+                    <div class="step"><div class="step-num">3</div> 点击按钮排版</div>
+                </div>
+
                 <div class="toolbar">
                     <div class="style-row">
                         <div class="style-tag" :class="{active: theme==='business'}" @click="setTheme('business')">🔵 商务蓝</div>
@@ -148,15 +139,15 @@
                         </div>
                     </div>
                     <div class="format-row">
-                        <button class="tool-btn" @click="insert('## ', '')">📝 标题</button>
+                        <button class="tool-btn" @click="insert('## ', '')">📝 设为大标题</button>
+                        <button class="tool-btn" @click="insert('### ', '')">📌 设为小标题</button>
                         <button class="tool-btn" @click="insert('**', '**')">B 加粗</button>
-                        <button class="tool-btn" @click="insert('> ', '')">💬 引用</button>
-                        <button class="tool-btn danger" @click="clear">🗑 清空</button>
+                        <button class="tool-btn" @click="insert('> ', '')">💬 设为引用</button>
+                        <button class="tool-btn danger" @click="clear">🗑 清空内容</button>
                     </div>
                 </div>
                 <div class="editor-box">
-                    <div class="notice-bar">💡 提示：直接粘贴文字即可，系统会自动智能分段。</div>
-                    <textarea id="editor" v-model="input" @input="render" placeholder="在此输入内容..."></textarea>
+                    <textarea id="editor" v-model="input" @input="render" placeholder="请在此处粘贴您的文章..."></textarea>
                 </div>
             </div>
 
@@ -170,7 +161,6 @@
     </div>
 
     <script>
-        // 错误监控
         window.onerror = function() {
             if(document.body.innerHTML.trim() === '') {
                 alert("组件加载异常，请尝试刷新页面 (Ctrl+R)");
@@ -181,7 +171,8 @@
 
         createApp({
             setup() {
-                const input = ref('## 布局已修复\n\n我们做了一个关键调整：\n\n1. **取消了强制一屏显示**。如果您的屏幕较小，网页右侧会出现滚动条，您可以向下滑动看到完整的手机框。\n2. **底部增加了安全留白**，确保手机框底部不会贴着屏幕边缘。\n\n> 现在，无论是在笔记本还是大屏幕上，页面都能完美显示。\n\n### 这是一个小标题\n体验更加流畅自然。');
+                // 优化后的默认引导文案
+                const input = ref('## 👋 欢迎使用！这里是您的写作空间\n\n您可以直接把写好的文章**粘贴**到这里，然后开始美化。\n\n### 💡 第一步：如何修改标题\n1. 用鼠标选中文字。\n2. 点击上方的【设为大标题】按钮。\n\n### ✨ 第二步：如何强调重点\n选中文字后，点击【加粗】按钮，文字就会变黑变粗。\n\n> 选中文字后点击【设为引用】，就可以生成像这样的金句框。\n\n### 🎉 第三步：发布\n全部调整好后，点击右上角的绿色按钮【复制到公众号】，然后去微信后台粘贴即可！');
                 const output = ref('');
                 const theme = ref('business');
                 const fontSize = ref(16);
@@ -193,21 +184,25 @@
                     const map = {
                         business: {
                             h2: `font-size:${s*1.2}px; border-left:6px solid #1890ff; background:#e6f7ff; padding:8px 12px; margin:30px 0 15px; font-weight:bold; display:block;`,
+                            h3: `font-size:${s}px; color:#1890ff; margin:20px 0 10px; font-weight:bold; border-bottom:2px solid #e6f7ff; display:inline-block;`,
                             strong: `color:#1890ff; font-weight:bold;`,
                             quote: `border-left:4px solid #ccc; background:#f5f5f5; padding:15px; color:#666; margin:20px 0;`
                         },
                         warm: {
                             h2: `font-size:${s*1.2}px; color:#d46b08; text-align:center; border:1px solid #ffe7ba; padding:8px 20px; border-radius:20px; margin:30px auto 15px; display:table; font-weight:bold;`,
+                            h3: `font-size:${s}px; color:#d46b08; border-bottom:2px solid #ffe7ba; padding-bottom:4px; display:inline-block; margin:20px 0 10px; font-weight:bold;`,
                             strong: `color:#d46b08; font-weight:bold;`,
                             quote: `border:1px dashed #ffd591; background:#fff7e6; padding:15px; color:#d46b08; margin:20px 0; border-radius:8px;`
                         },
                         clean: {
                             h2: `font-size:${s*1.2}px; color:white; background:#52c41a; padding:6px 15px; border-radius:4px; display:inline-block; margin:30px 0 15px; font-weight:bold;`,
+                            h3: `font-size:${s}px; color:#52c41a; border-left:4px solid #52c41a; padding-left:8px; margin:20px 0 10px; font-weight:bold; display:block;`,
                             strong: `color:#52c41a; border-bottom:2px solid #52c41a; font-weight:bold;`,
                             quote: `border-left:3px solid #52c41a; background:#f6ffed; padding:10px 15px; color:#333; margin:20px 0;`
                         },
                         festive: {
                             h2: `font-size:${s*1.2}px; color:#cf1322; border-top:2px solid #cf1322; border-bottom:2px solid #cf1322; padding:8px 0; text-align:center; margin:30px 0 15px; font-weight:bold; display:block;`,
+                            h3: `font-size:${s}px; color:#cf1322; background:#fff1f0; padding:4px 10px; border-radius:4px; display:inline-block; margin:20px 0 10px; font-weight:bold;`,
                             strong: `color:#cf1322; text-decoration:underline; font-weight:bold;`,
                             quote: `border:2px solid #ffccc7; background:#fff1f0; padding:15px; color:#cf1322; margin:20px 0; border-radius:8px;`
                         }
@@ -222,7 +217,7 @@
                     const s = getCss(theme.value, fontSize.value);
 
                     html = html.replace(/<h2/g, `<h2 style='${s.h2}' `)
-                               .replace(/<h3/g, `<h3 style='${s.h2}; font-size:${fontSize.value}px; border:none; background:none; padding:0; color:${s.strong.split(';')[0].split(':')[1]}' `)
+                               .replace(/<h3/g, `<h3 style='${s.h3}' `)
                                .replace(/<p/g, `<p style='${s.base}' `)
                                .replace(/<strong/g, `<strong style='${s.strong}' `)
                                .replace(/<blockquote/g, `<blockquote style='${s.quote}' `)
@@ -233,12 +228,29 @@
 
                 const setTheme = (t) => { theme.value = t; render(); };
                 
+                // 智能插入逻辑
                 const insert = (pre, suf) => {
                     const el = document.getElementById('editor');
                     const start = el.selectionStart;
                     const end = el.selectionEnd;
                     const txt = input.value;
-                    input.value = txt.substring(0, start) + pre + txt.substring(start, end) + suf + txt.substring(end);
+                    let selectTxt = txt.substring(start, end);
+                    
+                    if(!selectTxt) return;
+
+                    let newPre = pre;
+                    let newSuf = suf;
+                    
+                    if (pre.includes('##') || pre.includes('>')) {
+                        if (start > 0 && txt[start-1] !== '\n') {
+                            newPre = '\n\n' + pre;
+                        }
+                        if (end < txt.length && txt[end] !== '\n') {
+                            newSuf = suf + '\n\n';
+                        }
+                    }
+
+                    input.value = txt.substring(0, start) + newPre + selectTxt + newSuf + txt.substring(end);
                     render();
                 };
 
@@ -266,3 +278,5 @@
     </script>
 </body>
 </html>
+
+```
